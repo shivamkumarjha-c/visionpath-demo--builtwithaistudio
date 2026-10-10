@@ -72,14 +72,7 @@ The hackathon demo is built in Google AI Studio. Open the shared AI Studio app l
 
 ### Running an exported source version
 
-If the AI Studio app is exported to a local React project:
-
-```bash
-git clone https://github.com/shivamkumarjha-c/visionpath-demo--builtwithaistudio.git
-cd visionpath-demo--builtwithaistudio
-npm install
-npm run dev
-```
+Create a `.env` file in the project root with `GEMINI_API_KEY=your_key_here` (see `.env.example`). The key is read only by the Express server and is never sent to the browser. Never commit `.env`.
 
 Open the local URL printed by the development server. If Gemini access is enabled in the exported version, add the required API key using the environment-variable format documented by the exported project. Never commit API keys to GitHub.
 
@@ -105,7 +98,7 @@ For a quick presentation, use this example:
 - Give students one practical next action instead of overwhelming them with text.
 
 ## Limitations and future scope
-
+Current prototype limits: progress is stored in the browser (localStorage), not in the cloud; there are no user accounts; skill levels are self-reported; AI output can be imperfect and should be reviewed by the student.
 The quality of recommendations depends on the supplied job description and the accuracy of the student's self-assessment. Job requirements also change over time. Future versions can add:
 
 - verified career-page and job-board integrations;
@@ -119,15 +112,7 @@ The quality of recommendations depends on the supplied job description and the a
 
 Built for the **Tricity AI-Thon 2026** hackathon by the VisionPath team.
 
-## Submission checklist
-
-- Repository visibility: **Public**
-- All team members added as repository collaborators/contributors
-- README includes setup and demo instructions
-- Demo video set to Public or Unlisted and kept under four minutes
-- Google Drive assets shared as “Anyone with the link can view”
-- All links tested in an Incognito window
 
 ## License
 
-This project was created as a hackathon prototype. Add a license here if the team decides to open-source the implementation.
+This project was created as a hackathon prototype.
