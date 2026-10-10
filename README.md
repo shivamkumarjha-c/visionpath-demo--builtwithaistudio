@@ -75,8 +75,8 @@ The hackathon demo is built in Google AI Studio. Open the shared AI Studio app l
 If the AI Studio app is exported to a local React project:
 
 ```bash
-git clone <your-public-repository-url>
-cd <project-folder>
+git clone https://github.com/shivamkumarjha-c/visionpath-demo--builtwithaistudio.git
+cd visionpath-demo--builtwithaistudio
 npm install
 npm run dev
 ```
