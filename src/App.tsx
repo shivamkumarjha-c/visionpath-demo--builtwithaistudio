@@ -2,28 +2,17 @@ import React, { useState, useEffect, useMemo, useRef } from "react";
 import {
   ExternalLink,
   Sparkles,
-  FileText,
   Link2,
   ArrowRight,
   ArrowLeft,
-  RefreshCw,
-  Plus,
   Trash2,
-  Compass,
-  Award,
   Briefcase,
-  BookOpen,
   Check,
   RotateCcw,
   ChevronDown,
   ChevronRight,
   ShieldAlert,
   ShieldCheck,
-  Info,
-  CheckCircle2,
-  Target,
-  Layers,
-  GraduationCap,
   Play,
 } from "lucide-react";
 import {
@@ -50,30 +39,82 @@ import {
   type SkillDetail,
 } from "./data/visionPathEngine";
 
-const STORAGE_KEY = "visionpath_btech_universal_state_v6";
+const STORAGE_KEY = "visionpath_btech_universal_state_v7";
 
-const STEP_ITEMS = [
-  {
-    index: 0,
-    shortLabel: "1. Goal",
-    title: "Goal",
-    oneLine: "Choose your BTech branch, current year, and target role.",
-  },
-  {
-    index: 1,
-    shortLabel: "2. Skill Check",
-    title: "Skill Check",
-    oneLine: "Rate role-critical skills as Know it, Learning it, or Need to learn.",
-  },
-  {
-    index: 2,
-    shortLabel: "3. Action Plan",
-    title: "Action Plan",
-    oneLine: "See your visual skill gaps, top 3 next actions, 30-day plan, and year-wise BTech roadmap.",
-  },
+const SCREENS = [
+  { index: 0, label: "Welcome", num: "01" },
+  { index: 1, label: "Goal", num: "02" },
+  { index: 2, label: "Skill Check", num: "03" },
+  { index: 3, label: "Action Plan", num: "04" },
+  { index: 4, label: "Roadmap", num: "05" },
+  { index: 5, label: "Progress", num: "06" },
 ];
 
 const DEFAULT_STUDENT = SAMPLE_STUDENTS[0];
+
+/**
+ * Editorial abstract geometric career & learning illustration (Wix / Kinfolk magazine aesthetic).
+ */
+function EditorialCareerIllustration() {
+  return (
+    <div className="relative w-full h-full min-h-[280px] bg-[#F3EFE6] border border-[#141413]/15 rounded-2xl p-6 flex flex-col justify-between overflow-hidden">
+      <div className="flex items-center justify-between text-[11px] uppercase tracking-[0.16em] text-[#5C5953] border-b border-[#141413]/12 pb-3">
+        <span>Role Trajectory</span>
+        <span className="font-mono">Y1 → Y4</span>
+      </div>
+
+      <svg
+        viewBox="0 0 420 230"
+        className="w-full h-auto my-3"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        role="img"
+        aria-label="Abstract architectural career trajectory and skill readiness illustration"
+      >
+        {/* Subtle editorial grid lines */}
+        <line x1="20" y1="195" x2="400" y2="195" stroke="#141413" strokeOpacity="0.2" strokeWidth="1" />
+        <line x1="20" y1="145" x2="400" y2="145" stroke="#141413" strokeOpacity="0.08" strokeDasharray="3 3" />
+        <line x1="20" y1="95" x2="400" y2="95" stroke="#141413" strokeOpacity="0.08" strokeDasharray="3 3" />
+        <line x1="20" y1="45" x2="400" y2="45" stroke="#141413" strokeOpacity="0.08" strokeDasharray="3 3" />
+
+        {/* Warm architectural blocks representing 4 BTech Years */}
+        <rect x="42" y="148" width="54" height="47" rx="4" fill="#E5DEC9" stroke="#141413" strokeWidth="1.2" />
+        <rect x="128" y="114" width="54" height="81" rx="4" fill="#D8E5E7" stroke="#141413" strokeWidth="1.2" />
+        <rect x="214" y="78" width="54" height="117" rx="4" fill="#0F5C6E" fillOpacity="0.18" stroke="#0F5C6E" strokeWidth="1.4" />
+        <rect x="300" y="42" width="54" height="153" rx="4" fill="#0F5C6E" stroke="#141413" strokeWidth="1.2" />
+
+        {/* Ascending trajectory curve */}
+        <path
+          d="M 69 140 C 115 130, 140 105, 155 102 C 190 95, 220 68, 241 64 C 275 58, 305 32, 327 28"
+          stroke="#141413"
+          strokeWidth="2"
+          strokeLinecap="round"
+        />
+
+        {/* Milestone nodes */}
+        <circle cx="69" cy="140" r="4.5" fill="#FBF9F5" stroke="#141413" strokeWidth="2" />
+        <circle cx="155" cy="102" r="4.5" fill="#FBF9F5" stroke="#141413" strokeWidth="2" />
+        <circle cx="241" cy="64" r="5.5" fill="#0F5C6E" stroke="#FBF9F5" strokeWidth="2" />
+        <circle cx="327" cy="28" r="6" fill="#141413" />
+
+        {/* Subtle editorial sun/compass motif */}
+        <circle cx="82" cy="56" r="24" stroke="#0F5C6E" strokeOpacity="0.35" strokeWidth="1.2" />
+        <circle cx="82" cy="56" r="11" fill="#0F5C6E" fillOpacity="0.15" />
+
+        {/* Labels */}
+        <text x="53" y="212" fill="#5C5953" fontSize="10" fontFamily="monospace">YR 01</text>
+        <text x="139" y="212" fill="#5C5953" fontSize="10" fontFamily="monospace">YR 02</text>
+        <text x="225" y="212" fill="#0F5C6E" fontSize="10" fontWeight="bold" fontFamily="monospace">YR 03</text>
+        <text x="311" y="212" fill="#141413" fontSize="10" fontWeight="bold" fontFamily="monospace">YR 04</text>
+      </svg>
+
+      <div className="pt-3 border-t border-[#141413]/12 flex items-center justify-between text-xs text-[#4A4843]">
+        <span>Skills · Projects · Internships · Placement</span>
+        <span className="text-[#0F5C6E] font-semibold">Evidence-First</span>
+      </div>
+    </div>
+  );
+}
 
 interface SearchableSelectProps {
   label: string;
@@ -127,8 +168,10 @@ function SearchableAutocomplete({
   return (
     <div ref={containerRef} className="relative space-y-1.5">
       <div className="flex items-center justify-between gap-2">
-        <span className="text-xs font-semibold text-slate-800">{label}</span>
-        {sublabel && <span className="text-[11px] text-slate-500">{sublabel}</span>}
+        <span className="text-xs font-semibold uppercase tracking-wider text-[#2C2B29]">
+          {label}
+        </span>
+        {sublabel && <span className="text-[11px] text-[#6E6B64]">{sublabel}</span>}
       </div>
 
       <div className="relative">
@@ -145,13 +188,13 @@ function SearchableAutocomplete({
             }
           }}
           placeholder={placeholder}
-          className="w-full pl-3 pr-8 py-2 text-sm bg-white border border-slate-300 rounded-lg focus:outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-500/15"
+          className="w-full pl-3.5 pr-8 py-2.5 text-sm bg-[#FBF9F5] border border-[#141413]/25 rounded-lg text-[#141413] placeholder:text-[#8C887F] focus:outline-none focus:border-[#0F5C6E]"
         />
         <button
           type="button"
           tabIndex={-1}
           onClick={() => setIsOpen((prev) => !prev)}
-          className="absolute inset-y-0 right-0 px-2.5 flex items-center text-slate-400 hover:text-slate-700 cursor-pointer"
+          className="absolute inset-y-0 right-0 px-2.5 flex items-center text-[#5C5953] hover:text-[#141413] cursor-pointer"
           aria-label={`Toggle ${label} options`}
         >
           <ChevronDown className="w-4 h-4" />
@@ -159,7 +202,7 @@ function SearchableAutocomplete({
       </div>
 
       {isOpen && (
-        <div className="absolute z-40 mt-1 w-full max-h-56 overflow-y-auto bg-white border border-slate-200 rounded-lg shadow-lg py-1 text-xs">
+        <div className="absolute z-40 mt-1 w-full max-h-56 overflow-y-auto bg-[#FBF9F5] border border-[#141413]/20 rounded-lg shadow-md py-1 text-xs">
           {allowCustomText && query.trim() && !exactMatchExists && (
             <button
               type="button"
@@ -167,32 +210,33 @@ function SearchableAutocomplete({
                 onChange(query.trim());
                 setIsOpen(false);
               }}
-              className="w-full text-left px-3 py-2 font-medium text-indigo-700 bg-indigo-50/70 hover:bg-indigo-100 flex items-center justify-between cursor-pointer"
+              className="w-full text-left px-3.5 py-2 font-medium text-[#0F5C6E] bg-[#E6F1F3] hover:bg-[#d5e8ec] flex items-center justify-between cursor-pointer"
             >
               <span>Use custom: “{query.trim()}”</span>
-              <span className="text-[11px] text-indigo-600">Custom</span>
+              <span className="text-[11px]">Custom</span>
             </button>
           )}
 
           {filteredOptions.map((opt) => {
+            const labelText = opt === "" ? "No specific company (Use Role Profile)" : opt;
             const isSelected = opt.toLowerCase() === value.trim().toLowerCase();
             return (
               <button
-                key={opt}
+                key={opt || "__empty__"}
                 type="button"
                 onClick={() => {
                   setQuery(opt);
                   onChange(opt);
                   setIsOpen(false);
                 }}
-                className={`w-full text-left px-3 py-2 flex items-center justify-between transition-colors cursor-pointer ${
+                className={`w-full text-left px-3.5 py-2 flex items-center justify-between transition-colors cursor-pointer ${
                   isSelected
-                    ? "bg-indigo-50 text-indigo-900 font-semibold"
-                    : "text-slate-700 hover:bg-slate-100"
+                    ? "bg-[#E6F1F3] text-[#0F5C6E] font-semibold"
+                    : "text-[#2C2B29] hover:bg-[#F3EFE6]"
                 }`}
               >
-                <span>{opt}</span>
-                {isSelected && <Check className="w-3.5 h-3.5 text-indigo-600 shrink-0" />}
+                <span>{labelText}</span>
+                {isSelected && <Check className="w-3.5 h-3.5 text-[#0F5C6E] shrink-0" />}
               </button>
             );
           })}
@@ -209,7 +253,7 @@ export default function App() {
       if (saved) {
         const parsed = JSON.parse(saved);
         if (typeof parsed.step === "number") {
-          return Math.min(2, Math.max(0, parsed.step));
+          return Math.min(5, Math.max(0, parsed.step));
         }
       }
     } catch {
@@ -224,6 +268,7 @@ export default function App() {
       localStorage.removeItem("visionpath_btech_universal_state_v3");
       localStorage.removeItem("visionpath_btech_universal_state_v4");
       localStorage.removeItem("visionpath_btech_universal_state_v5");
+      localStorage.removeItem("visionpath_btech_universal_state_v6");
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) {
         const parsed = JSON.parse(saved);
@@ -362,25 +407,17 @@ export default function App() {
     message: string;
   } | null>(null);
 
-  // UI toggles to keep the primary flow fast and uncluttered
-  const [showHowItWorks, setShowHowItWorks] = useState(true);
   const [showJdInputSection, setShowJdInputSection] = useState(false);
   const [showBonusSkillsOnCheck, setShowBonusSkillsOnCheck] = useState(false);
   const [expandedWhySkill, setExpandedWhySkill] = useState<Record<string, boolean>>({});
   const [expandedWhyRec, setExpandedWhyRec] = useState<Record<number, boolean>>({});
-  const [showAllFourYears, setShowAllFourYears] = useState(false);
-  const [activeOptionalPanel, setActiveOptionalPanel] = useState<
-    "none" | "evidence" | "applications" | "requirements"
-  >("none");
 
   const [newSkillInput, setNewSkillInput] = useState("");
   const [newSkillTier, setNewSkillTier] = useState<"Required" | "Preferred">("Required");
   const [newTaskInput, setNewTaskInput] = useState("");
   const [newAppCompany, setNewAppCompany] = useState("");
   const [newAppRole, setNewAppRole] = useState("");
-  const [newAppLocation, setNewAppLocation] = useState("Bengaluru · Hybrid");
   const [newAppStatus, setNewAppStatus] = useState<ApplicationEntry["status"]>("Building Proof");
-  const [newAppDeadline, setNewAppDeadline] = useState("2026-11-30");
   const [newAppEvidence, setNewAppEvidence] = useState("");
 
   useEffect(() => {
@@ -465,9 +502,7 @@ export default function App() {
         }
       }
       if (!detailsList.some((d) => d.skill.toLowerCase() === clean.toLowerCase())) {
-        detailsList.push(
-          getSkillDetail(clean, item.tier, form.role, "Added by student")
-        );
+        detailsList.push(getSkillDetail(clean, item.tier, form.role, "Added by student"));
       }
     }
 
@@ -518,7 +553,6 @@ export default function App() {
     };
   }, [geminiGuidance, baselineGuidance]);
 
-  // Combine 30-day phase tasks + custom tasks + active year tasks for progress tracking
   const allThirtyDayTasks = useMemo(() => {
     const phaseTasks = activeGuidance.thirtyDayPhases.flatMap((p) => p.tasks);
     return [...phaseTasks, ...customTasks];
@@ -567,7 +601,7 @@ export default function App() {
     }
   };
 
-  const handleLoadSampleStudent = (presetId: string, jumpToResults = false) => {
+  const handleLoadSampleStudent = (presetId: string, targetScreen?: number) => {
     const preset = SAMPLE_STUDENTS.find((p) => p.id === presetId) || SAMPLE_STUDENTS[0];
     setSelectedPresetId(preset.id);
     setForm(preset.form);
@@ -581,15 +615,14 @@ export default function App() {
     setGeminiGuidance(null);
     setJdNotice(null);
     setGuidanceNotice(null);
-    if (jumpToResults) {
-      setStep(2);
+    if (typeof targetScreen === "number") {
+      setStep(targetScreen);
     }
   };
 
   const handleResetAll = () => {
     localStorage.removeItem(STORAGE_KEY);
-    handleLoadSampleStudent(DEFAULT_STUDENT.id, false);
-    setStep(0);
+    handleLoadSampleStudent(DEFAULT_STUDENT.id, 0);
   };
 
   const handleExtractJobDescription = async () => {
@@ -770,7 +803,7 @@ export default function App() {
         });
         setGuidanceNotice({
           type: "gemini",
-          message: "Action plan personalized with Gemini for your branch, year, and skill check.",
+          message: "Personalized with Gemini for your branch, year, and skill profile.",
         });
       } else {
         throw new Error("Incomplete Gemini response");
@@ -783,7 +816,7 @@ export default function App() {
       setGeminiGuidance(fallback);
       setGuidanceNotice({
         type: "fallback",
-        message: "Using VisionPath deterministic role & year-wise personalization engine.",
+        message: "Updated with VisionPath deterministic role & year-wise engine.",
       });
     } finally {
       setIsPersonalizing(false);
@@ -827,9 +860,9 @@ export default function App() {
       id: `app-${Date.now()}`,
       company: newAppCompany.trim(),
       role: newAppRole.trim(),
-      locationOrMode: newAppLocation.trim() || "India",
+      locationOrMode: "India",
       status: newAppStatus,
-      deadlineOrDate: newAppDeadline,
+      deadlineOrDate: "2026-11-30",
       evidenceShared:
         newAppEvidence.trim() ||
         evidence.githubUrl ||
@@ -844,604 +877,590 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 font-sans pb-16">
-      {/* Top Navigation & Judge Quick Demo Bar */}
-      <header className="sticky top-0 z-30 bg-white/95 backdrop-blur border-b border-slate-200">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-3">
-          <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-indigo-600 text-white flex items-center justify-center shadow-xs shrink-0">
-              <Compass className="w-5 h-5" />
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="font-display font-bold text-base tracking-tight text-slate-900">
-                  VisionPath
-                </span>
-                <span className="text-[11px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-md bg-indigo-50 text-indigo-700 border border-indigo-200">
-                  Year-Wise BTech Planner
-                </span>
-              </div>
-              <p className="text-xs text-slate-600 hidden sm:block">
-                VisionPath shows a student what to learn next for a specific role, and how to prove it.
-              </p>
-            </div>
-          </div>
+    <div className="min-h-screen bg-[#FBF9F5] text-[#141413] font-sans pb-20">
+      {/* Minimal Editorial Top Navigation */}
+      <header className="sticky top-0 z-30 bg-[#FBF9F5]/95 backdrop-blur border-b border-[#141413]/15">
+        <div className="max-w-6xl mx-auto px-4 sm:px-8 py-3.5 flex flex-wrap items-center justify-between gap-4">
+          <button
+            type="button"
+            onClick={() => setStep(0)}
+            className="text-left flex items-baseline gap-2.5 cursor-pointer group"
+          >
+            <span className="font-serif text-2xl font-medium tracking-tight text-[#141413]">
+              VisionPath
+            </span>
+            <span className="text-[11px] uppercase tracking-[0.16em] text-[#6E6B64] hidden sm:inline">
+              BTech Career & Role Edition
+            </span>
+          </button>
 
-          {/* 1-Click Judge Demo Controls */}
-          <div className="flex flex-wrap items-center gap-2">
-            <div className="flex items-center gap-1.5 bg-slate-100 px-2.5 py-1.5 rounded-lg border border-slate-200">
-              <span className="text-[11px] font-semibold text-slate-600">Demo Profile:</span>
-              <select
-                aria-label="Load Sample Student Demo"
-                value={selectedPresetId}
-                onChange={(e) => handleLoadSampleStudent(e.target.value, false)}
-                className="text-xs font-semibold text-slate-800 bg-transparent focus:outline-none cursor-pointer"
-              >
-                {SAMPLE_STUDENTS.map((preset) => (
-                  <option key={preset.id} value={preset.id}>
-                    {preset.shortBranch} ({preset.form.year})
-                  </option>
-                ))}
-              </select>
-            </div>
+          {/* 6 Editorial Screen Links */}
+          <nav
+            aria-label="Editorial sections"
+            className="flex items-center gap-1 sm:gap-2 overflow-x-auto py-0.5"
+          >
+            {SCREENS.map((scr) => {
+              const active = step === scr.index;
+              return (
+                <button
+                  key={scr.index}
+                  type="button"
+                  onClick={() => setStep(scr.index)}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs transition-colors flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
+                    active
+                      ? "bg-[#141413] text-[#FBF9F5] font-semibold"
+                      : "text-[#4A4843] hover:text-[#141413] hover:bg-[#F3EFE6]"
+                  }`}
+                >
+                  <span className="font-mono text-[10px] opacity-65">{scr.num}</span>
+                  <span>{scr.label}</span>
+                </button>
+              );
+            })}
+          </nav>
+
+          {/* Subtle Sample Student Switcher */}
+          <div className="flex items-center gap-2">
+            <select
+              aria-label="Load Sample Student Demo"
+              value={selectedPresetId}
+              onChange={(e) => handleLoadSampleStudent(e.target.value)}
+              className="text-xs font-medium text-[#2C2B29] bg-[#F3EFE6] border border-[#141413]/15 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-[#0F5C6E] cursor-pointer"
+            >
+              {SAMPLE_STUDENTS.map((preset) => (
+                <option key={preset.id} value={preset.id}>
+                  Sample: {preset.shortBranch} ({preset.form.year})
+                </option>
+              ))}
+            </select>
 
             <button
               type="button"
-              onClick={() => handleLoadSampleStudent(selectedPresetId, true)}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 text-white hover:bg-indigo-700 transition-colors cursor-pointer shadow-xs"
+              onClick={() => handleLoadSampleStudent(selectedPresetId, 3)}
+              title="Load sample student and jump to Action Plan"
+              className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-[#E6F1F3] text-[#0F5C6E] hover:bg-[#d5e8ec] transition-colors cursor-pointer"
             >
-              <Play className="w-3.5 h-3.5 fill-current" />
-              <span>1-Click Judge Demo</span>
+              <Play className="w-3 h-3 fill-current" />
+              <span className="hidden md:inline">Demo</span>
             </button>
 
             <button
               type="button"
               onClick={handleResetAll}
-              title="Reset to default sample student"
-              className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 border border-slate-200 transition-colors cursor-pointer"
+              title="Reset"
+              className="p-1.5 rounded-lg text-[#6E6B64] hover:text-[#141413] hover:bg-[#F3EFE6] cursor-pointer"
             >
               <RotateCcw className="w-3.5 h-3.5" />
-              <span className="hidden md:inline">Reset</span>
             </button>
-          </div>
-        </div>
-
-        {/* 3-Step Progress Bar: Goal -> Skill Check -> Action Plan */}
-        <div className="bg-slate-100/80 border-t border-slate-200/80">
-          <div className="max-w-5xl mx-auto px-4 sm:px-6 py-2 flex items-center justify-between gap-3">
-            <nav aria-label="Progress steps" className="flex items-center gap-1.5 sm:gap-3">
-              {STEP_ITEMS.map((item, idx) => {
-                const isActive = step === item.index;
-                const isDone = step > item.index;
-                return (
-                  <React.Fragment key={item.index}>
-                    <button
-                      type="button"
-                      onClick={() => setStep(item.index)}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer ${
-                        isActive
-                          ? "bg-slate-900 text-white shadow-xs"
-                          : isDone
-                            ? "bg-indigo-50 text-indigo-800 border border-indigo-200 hover:bg-indigo-100"
-                            : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-50"
-                      }`}
-                    >
-                      {isDone && <Check className="w-3.5 h-3.5 text-indigo-600" />}
-                      <span>{item.shortLabel}</span>
-                    </button>
-                    {idx < STEP_ITEMS.length - 1 && (
-                      <ChevronRight className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                    )}
-                  </React.Fragment>
-                );
-              })}
-            </nav>
-
-            <div className="flex items-center gap-2 text-xs">
-              <span className="hidden sm:inline text-slate-500">
-                {form.branch.split(" (")[0]} · {form.year} ·{" "}
-                <strong className="text-slate-800">{form.role}</strong>
-              </span>
-              <span
-                className={`px-2 py-0.5 rounded-md font-mono font-bold text-xs ${
-                  gapAnalysis.readiness >= 75
-                    ? "bg-emerald-100 text-emerald-800"
-                    : gapAnalysis.readiness >= 45
-                      ? "bg-amber-100 text-amber-800"
-                      : "bg-rose-100 text-rose-800"
-                }`}
-              >
-                {gapAnalysis.readiness}% Coverage
-              </span>
-            </div>
           </div>
         </div>
       </header>
 
-      <main className="max-w-5xl mx-auto px-4 sm:px-6 pt-5 space-y-5">
-        {/* Core Problem Statement & How It Works Banner */}
-        <section className="bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-xs">
-          <div className="flex flex-wrap items-start justify-between gap-3">
-            <div className="space-y-1 max-w-3xl">
-              <div className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-indigo-700 bg-indigo-50 px-2.5 py-0.5 rounded-md border border-indigo-200">
-                <GraduationCap className="w-3.5 h-3.5" />
-                <span>Problem Statement: Help BTech students plan skills, projects, internships and placement preparation year-wise</span>
-              </div>
-              <p className="text-sm sm:text-base font-bold text-slate-900 pt-0.5">
-                “VisionPath shows a student what to learn next for a specific role, and how to prove it.”
-              </p>
-            </div>
-
-            <button
-              type="button"
-              onClick={() => setShowHowItWorks((prev) => !prev)}
-              className="text-xs font-semibold text-indigo-700 hover:text-indigo-900 inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-indigo-50/70 hover:bg-indigo-100 cursor-pointer shrink-0"
-            >
-              <Info className="w-3.5 h-3.5" />
-              <span>{showHowItWorks ? "Hide How it works" : "How it works (3 steps)"}</span>
-            </button>
-          </div>
-
-          {showHowItWorks && (
-            <div className="mt-3.5 pt-3.5 border-t border-slate-100 grid grid-cols-1 sm:grid-cols-3 gap-3">
-              <div className="p-3 rounded-xl bg-slate-50 border border-slate-200/80">
-                <div className="text-xs font-bold text-indigo-700">Step 1 · Goal (30 sec)</div>
-                <p className="text-xs text-slate-600 mt-0.5">
-                  Pick your BTech branch, current year, internship/placement goal, and target role (plus optional company or JD).
-                </p>
-              </div>
-              <div className="p-3 rounded-xl bg-slate-50 border border-slate-200/80">
-                <div className="text-xs font-bold text-indigo-700">Step 2 · Quick Skill Check (30 sec)</div>
-                <p className="text-xs text-slate-600 mt-0.5">
-                  Mark role-critical skills with three simple choices: <strong>Know it</strong>, <strong>Learning it</strong>, or <strong>Need to learn</strong>.
-                </p>
-              </div>
-              <div className="p-3 rounded-xl bg-slate-50 border border-slate-200/80">
-                <div className="text-xs font-bold text-indigo-700">Step 3 · Action Plan (Instant)</div>
-                <p className="text-xs text-slate-600 mt-0.5">
-                  Get a visual gap chart, top 3 next actions, one practical project, a 30-day weekly checklist, and your Year 1–4 BTech plan.
-                </p>
-              </div>
-            </div>
-          )}
-        </section>
-
+      <main className="max-w-6xl mx-auto px-4 sm:px-8 pt-8 sm:pt-12">
         {/* =========================================================
-            STEP 0: GOAL (Branch, Year, Internship/Placement, Company Optional, Target Role)
+            SCREEN 1: WELCOME
+            Large headline: “Prepare for the role you want.”
+            Short supporting text and one strong “Start assessment” button.
            ========================================================= */}
         {step === 0 && (
-          <section className="space-y-4">
-            <div className="bg-white rounded-2xl border border-slate-200 p-5 sm:p-6 shadow-xs space-y-5">
-              <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-4">
-                <div>
-                  <span className="text-[11px] font-bold uppercase tracking-wider text-indigo-600">
-                    Step 1 of 3 · Goal
-                  </span>
-                  <h1 className="text-lg sm:text-xl font-display font-bold text-slate-900">
-                    Set Your BTech Year & Target Role
-                  </h1>
-                  <p className="text-xs sm:text-sm text-slate-600 mt-0.5">
-                    Tell us your branch, current year, and target role so we can load the exact skills and year-wise plan you need.
-                  </p>
+          <section className="space-y-12">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center pb-10 border-b border-[#141413]/15">
+              <div className="lg:col-span-7 space-y-6">
+                <div className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.18em] text-[#0F5C6E] font-semibold">
+                  <span>BTech Year-Wise Career Architecture</span>
                 </div>
 
-                <button
-                  type="button"
-                  onClick={() => setStep(1)}
-                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold bg-indigo-600 text-white hover:bg-indigo-700 transition-colors cursor-pointer shadow-xs"
-                >
-                  <span>Next: Quick Skill Check</span>
-                  <ArrowRight className="w-4 h-4" />
-                </button>
-              </div>
+                <h1 className="font-serif text-4xl sm:text-6xl leading-[1.08] tracking-tight text-[#141413]">
+                  Prepare for the role you want.
+                </h1>
 
-              {/* Quick Demo Switcher Chips for Judges & Students */}
-              <div className="bg-slate-50 rounded-xl p-3 border border-slate-200/80 flex flex-wrap items-center justify-between gap-2">
-                <span className="text-xs font-semibold text-slate-700">
-                  Quick load a sample BTech student:
-                </span>
-                <div className="flex flex-wrap gap-1.5">
-                  {SAMPLE_STUDENTS.map((preset) => (
-                    <button
-                      key={preset.id}
-                      type="button"
-                      onClick={() => handleLoadSampleStudent(preset.id, false)}
-                      className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-colors cursor-pointer ${
-                        selectedPresetId === preset.id
-                          ? "bg-indigo-600 text-white font-semibold"
-                          : "bg-white text-slate-700 border border-slate-200 hover:bg-slate-100"
-                      }`}
-                    >
-                      {preset.shortBranch} ({preset.form.year})
-                    </button>
-                  ))}
-                </div>
-              </div>
+                <p className="text-base sm:text-lg text-[#4A4843] leading-relaxed max-w-xl">
+                  VisionPath shows a BTech student what to learn next for a specific internship or placement role, how to prove it with a practical project, and how to plan from Year 1 to Year 4.
+                </p>
 
-              {/* Primary 2-Minute Goal Inputs */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <SearchableAutocomplete
-                  label="1. Degree / BTech Branch"
-                  sublabel="Search or type custom"
-                  value={form.branch}
-                  options={CURATED_BRANCHES}
-                  placeholder="e.g., CSE, ECE, Mechanical, Civil..."
-                  onChange={(val) => updateFormField("branch", val)}
-                />
-
-                <div className="space-y-1.5">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-semibold text-slate-800">2. Current BTech Year</span>
-                    <span className="text-[11px] text-slate-500">Adapts Year 1–4 plan</span>
-                  </div>
-                  <div className="grid grid-cols-4 gap-1.5">
-                    {(["1st Year", "2nd Year", "3rd Year", "4th Year"] as const).map((yr) => (
-                      <button
-                        key={yr}
-                        type="button"
-                        onClick={() => updateFormField("year", yr)}
-                        className={`py-2 px-2 rounded-lg text-xs font-semibold border transition-all cursor-pointer ${
-                          form.year === yr
-                            ? "bg-indigo-600 text-white border-indigo-600 shadow-xs"
-                            : "bg-white text-slate-700 border-slate-300 hover:bg-slate-50"
-                        }`}
-                      >
-                        {yr}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="space-y-1.5">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-semibold text-slate-800">3. Primary Goal</span>
-                    <span className="text-[11px] text-slate-500">Target outcome</span>
-                  </div>
-                  <div className="grid grid-cols-3 gap-1.5">
-                    {(["Internship", "Placement", "Higher studies"] as const).map((g) => (
-                      <button
-                        key={g}
-                        type="button"
-                        onClick={() => updateFormField("goal", g)}
-                        className={`py-2 px-2.5 rounded-lg text-xs font-semibold border transition-all cursor-pointer ${
-                          form.goal === g
-                            ? "bg-indigo-600 text-white border-indigo-600 shadow-xs"
-                            : "bg-white text-slate-700 border-slate-300 hover:bg-slate-50"
-                        }`}
-                      >
-                        {g}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <SearchableAutocomplete
-                  label="4. Target Job Role"
-                  sublabel="Search or type custom"
-                  value={form.role}
-                  options={CURATED_ROLES}
-                  placeholder="e.g., Backend Developer, ML Engineer, Embedded..."
-                  onChange={(val) => updateFormField("role", val)}
-                />
-              </div>
-
-              {/* Popular Role Quick-Select Chips */}
-              <div className="flex flex-wrap items-center gap-1.5 pt-1">
-                <span className="text-[11px] font-semibold text-slate-500 mr-1">Popular roles:</span>
-                {[
-                  "Backend Developer",
-                  "ML Engineer",
-                  "Data Analyst",
-                  "Frontend Developer",
-                  "Embedded Systems Engineer",
-                  "Mechanical Design Engineer",
-                ].map((r) => (
+                <div className="pt-2 flex flex-wrap items-center gap-4">
                   <button
-                    key={r}
                     type="button"
-                    onClick={() => updateFormField("role", r)}
-                    className={`px-2.5 py-1 rounded-md text-xs transition-colors cursor-pointer ${
-                      form.role.toLowerCase() === r.toLowerCase()
-                        ? "bg-slate-900 text-white font-semibold"
-                        : "bg-slate-100 text-slate-700 hover:bg-slate-200"
-                    }`}
+                    onClick={() => setStep(1)}
+                    className="inline-flex items-center gap-2.5 px-6 py-3.5 rounded-lg text-sm font-semibold bg-[#0F5C6E] text-white hover:bg-[#0B4654] transition-colors cursor-pointer shadow-xs"
                   >
-                    {r}
+                    <span>Start assessment</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => handleLoadSampleStudent(selectedPresetId, 3)}
+                    className="inline-flex items-center gap-2 px-4 py-3.5 rounded-lg text-sm font-medium text-[#141413] border border-[#141413]/25 hover:bg-[#F3EFE6] transition-colors cursor-pointer"
+                  >
+                    <span>View sample action plan</span>
+                  </button>
+                </div>
+
+                <div className="pt-4 border-t border-[#141413]/12 grid grid-cols-3 gap-4 max-w-lg text-xs text-[#5C5953]">
+                  <div>
+                    <span className="font-mono text-[#141413] font-semibold block">01 · Goal</span>
+                    <span>Branch, year & role</span>
+                  </div>
+                  <div>
+                    <span className="font-mono text-[#141413] font-semibold block">02 · Skill Check</span>
+                    <span>3 simple choices</span>
+                  </div>
+                  <div>
+                    <span className="font-mono text-[#141413] font-semibold block">03 · Plan & Proof</span>
+                    <span>Gaps, project & 4-yr plan</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="lg:col-span-5">
+                <EditorialCareerIllustration />
+              </div>
+            </div>
+
+            {/* Minimal Editorial Strip: Problem Statement & Sample Branches */}
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+              <div className="md:col-span-5 space-y-1">
+                <span className="text-[11px] uppercase tracking-[0.16em] text-[#6E6B64] font-semibold">
+                  Core Mission
+                </span>
+                <p className="font-serif text-xl text-[#141413]">
+                  “Help BTech students plan skills, projects, internships and placement preparation year-wise.”
+                </p>
+              </div>
+
+              <div className="md:col-span-7 flex flex-wrap items-center gap-2 md:justify-end">
+                <span className="text-xs text-[#6E6B64] mr-1">Explore sample profiles:</span>
+                {SAMPLE_STUDENTS.map((preset) => (
+                  <button
+                    key={preset.id}
+                    type="button"
+                    onClick={() => handleLoadSampleStudent(preset.id, 3)}
+                    className="px-3 py-1.5 rounded-lg text-xs font-medium bg-[#F3EFE6] text-[#141413] border border-[#141413]/15 hover:border-[#0F5C6E] hover:text-[#0F5C6E] transition-colors cursor-pointer"
+                  >
+                    {preset.shortBranch}
                   </button>
                 ))}
-              </div>
-
-              {/* Company Field (Optional) & Expandable Job Description Source Verification */}
-              <div className="pt-3 border-t border-slate-100 grid grid-cols-1 sm:grid-cols-2 gap-4 items-start">
-                <div className="space-y-2">
-                  <SearchableAutocomplete
-                    label="5. Target Company (Optional)"
-                    sublabel={
-                      form.goal === "Higher studies"
-                        ? "Optional for Higher studies"
-                        : "Select or choose Other"
-                    }
-                    value={form.companySelection}
-                    options={["", ...CURATED_COMPANIES]}
-                    placeholder="Optional — e.g., Google, Razorpay, Qualcomm, TCS, Other"
-                    allowCustomText={false}
-                    onChange={(val) => updateFormField("companySelection", val)}
-                  />
-                  {form.companySelection === "Other" && (
-                    <input
-                      type="text"
-                      value={form.customCompany}
-                      onChange={(e) => updateFormField("customCompany", e.target.value)}
-                      placeholder="Enter custom company name..."
-                      className="w-full px-3 py-2 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:border-indigo-600"
-                    />
-                  )}
-                </div>
-
-                {/* Source Status Summary Card */}
-                <div
-                  className={`p-3.5 rounded-xl border text-xs space-y-1.5 ${
-                    activeTrack.isCompanyVerified
-                      ? "bg-emerald-50/70 border-emerald-200 text-emerald-950"
-                      : effectiveCompany
-                        ? "bg-amber-50/80 border-amber-200 text-amber-950"
-                        : "bg-slate-50 border-slate-200 text-slate-700"
-                  }`}
-                >
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="font-bold flex items-center gap-1.5">
-                      {activeTrack.isCompanyVerified ? (
-                        <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
-                      ) : (
-                        <ShieldAlert className="w-4 h-4 text-amber-600 shrink-0" />
-                      )}
-                      <span>{activeTrack.verificationStatusLabel}</span>
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => setShowJdInputSection((prev) => !prev)}
-                      className="text-indigo-700 font-semibold hover:underline cursor-pointer shrink-0"
-                    >
-                      {showJdInputSection ? "Hide JD box" : "Paste JD (Optional)"}
-                    </button>
-                  </div>
-                  <p className="text-[11px] leading-relaxed opacity-90">
-                    {activeTrack.sourceSummary}
-                  </p>
-                </div>
-              </div>
-
-              {/* Optional Collapsible Job Description / Careers URL Verification */}
-              {showJdInputSection && (
-                <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-3">
-                  <div className="flex flex-wrap items-center justify-between gap-2">
-                    <div>
-                      <h3 className="text-xs font-bold text-slate-900">
-                        Optional: Paste Job Description or Careers URL
-                      </h3>
-                      <p className="text-[11px] text-slate-600">
-                        VisionPath never guesses company requirements from a company name alone. Paste a JD to extract exact required skills.
-                      </p>
-                    </div>
-                    <div className="flex flex-wrap gap-1.5">
-                      {Object.keys(SAMPLE_JDS).map((sampleRole) => (
-                        <button
-                          key={sampleRole}
-                          type="button"
-                          onClick={() => {
-                            updateFormField("role", sampleRole);
-                            updateFormField("jdText", SAMPLE_JDS[sampleRole]);
-                          }}
-                          className="px-2 py-1 rounded text-[11px] font-medium bg-white border border-slate-200 text-slate-700 hover:bg-slate-100 cursor-pointer"
-                        >
-                          Load {sampleRole} JD
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  <input
-                    type="url"
-                    value={form.jobSourceUrl}
-                    onChange={(e) => updateFormField("jobSourceUrl", e.target.value)}
-                    placeholder="Optional public job posting URL (e.g., https://careers.company.com/...)"
-                    className="w-full px-3 py-2 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:border-indigo-600"
-                  />
-
-                  <textarea
-                    rows={4}
-                    value={form.jdText}
-                    onChange={(e) => updateFormField("jdText", e.target.value)}
-                    placeholder="Paste the job description text here to extract verified required & preferred skills..."
-                    className="w-full p-3 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:border-indigo-600 font-mono"
-                  />
-
-                  <div className="flex flex-wrap items-center justify-between gap-2">
-                    <div className="flex items-center gap-2">
-                      <button
-                        type="button"
-                        onClick={handleExtractJobDescription}
-                        disabled={isExtractingJd}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-900 text-white hover:bg-slate-800 disabled:opacity-50 cursor-pointer"
-                      >
-                        <Sparkles className="w-3.5 h-3.5" />
-                        <span>{isExtractingJd ? "Verifying JD..." : "Verify Skills from JD"}</span>
-                      </button>
-                      {form.jdText.trim() && (
-                        <button
-                          type="button"
-                          onClick={() => {
-                            updateFormField("jdText", "");
-                            setGeminiExtractedTrack(null);
-                            setJdNotice(null);
-                          }}
-                          className="px-2.5 py-1.5 rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-200 cursor-pointer"
-                        >
-                          Clear JD
-                        </button>
-                      )}
-                    </div>
-                    {jdNotice && (
-                      <span className="text-xs font-medium text-indigo-700">
-                        {jdNotice.message}
-                      </span>
-                    )}
-                  </div>
-                </div>
-              )}
-
-              {/* Bottom CTA */}
-              <div className="pt-2 flex items-center justify-between gap-3">
-                <div className="text-xs text-slate-600">
-                  Loaded <strong>{activeTrack.required.length} required</strong> &{" "}
-                  <strong>{activeTrack.preferred.length} preferred</strong> skills for{" "}
-                  <strong className="text-slate-900">{form.role}</strong>.
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setStep(1)}
-                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold bg-indigo-600 text-white hover:bg-indigo-700 transition-colors cursor-pointer shadow-xs"
-                >
-                  <span>Continue to Quick Skill Check</span>
-                  <ArrowRight className="w-4 h-4" />
-                </button>
               </div>
             </div>
           </section>
         )}
 
         {/* =========================================================
-            STEP 1: QUICK SKILL CHECK (Role-Critical Skills + 3 Simple Choices)
+            SCREEN 2: GOAL
+            Clean editorial form for branch, year, goal, company, and target role.
            ========================================================= */}
         {step === 1 && (
-          <section className="space-y-4">
-            <div className="bg-white rounded-2xl border border-slate-200 p-5 sm:p-6 shadow-xs space-y-5">
-              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-4">
-                <div>
-                  <span className="text-[11px] font-bold uppercase tracking-wider text-indigo-600">
-                    Step 2 of 3 · Quick Skill Check
-                  </span>
-                  <h1 className="text-lg sm:text-xl font-display font-bold text-slate-900">
-                    Rate Your {form.role} Skills
-                  </h1>
-                  <p className="text-xs sm:text-sm text-slate-600 mt-0.5">
-                    Mark each role-critical skill with one of three simple choices: <strong>Know it</strong>, <strong>Learning it</strong>, or <strong>Need to learn</strong>.
-                  </p>
-                </div>
+          <section className="space-y-8">
+            <div className="flex flex-wrap items-end justify-between gap-4 pb-6 border-b border-[#141413]/15">
+              <div className="space-y-1.5">
+                <span className="text-xs font-mono uppercase tracking-[0.16em] text-[#0F5C6E]">
+                  02 / Goal Definition
+                </span>
+                <h1 className="font-serif text-3xl sm:text-4xl text-[#141413]">
+                  Select your academic stage and target role.
+                </h1>
+                <p className="text-sm text-[#5C5953]">
+                  Your branch, year, and role determine the exact skill benchmark and four-year roadmap.
+                </p>
+              </div>
 
-                <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setStep(0)}
-                    className="inline-flex items-center gap-1 px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 cursor-pointer"
-                  >
-                    <ArrowLeft className="w-3.5 h-3.5" />
-                    <span>Back</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setStep(2)}
-                    className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold bg-indigo-600 text-white hover:bg-indigo-700 cursor-pointer shadow-xs"
-                  >
-                    <span>See My Action Plan</span>
-                    <ArrowRight className="w-4 h-4" />
-                  </button>
+              <button
+                type="button"
+                onClick={() => setStep(2)}
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold bg-[#0F5C6E] text-white hover:bg-[#0B4654] transition-colors cursor-pointer"
+              >
+                <span>Continue to Skill Check</span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-[#F3EFE6]/60 p-6 sm:p-8 rounded-2xl border border-[#141413]/15">
+              <SearchableAutocomplete
+                label="Degree / Branch"
+                sublabel="Search or enter custom"
+                value={form.branch}
+                options={CURATED_BRANCHES}
+                placeholder="e.g., CSE, ECE, Mechanical, Civil..."
+                onChange={(val) => updateFormField("branch", val)}
+              />
+
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-semibold uppercase tracking-wider text-[#2C2B29]">
+                    Current Year
+                  </span>
+                  <span className="text-[11px] text-[#6E6B64]">Personalizes timeline</span>
+                </div>
+                <div className="grid grid-cols-4 gap-2">
+                  {(["1st Year", "2nd Year", "3rd Year", "4th Year"] as const).map((yr) => (
+                    <button
+                      key={yr}
+                      type="button"
+                      onClick={() => updateFormField("year", yr)}
+                      className={`py-2.5 px-2 rounded-lg text-xs font-semibold border transition-colors cursor-pointer ${
+                        form.year === yr
+                          ? "bg-[#141413] text-[#FBF9F5] border-[#141413]"
+                          : "bg-[#FBF9F5] text-[#2C2B29] border-[#141413]/20 hover:bg-[#F3EFE6]"
+                      }`}
+                    >
+                      {yr}
+                    </button>
+                  ))}
                 </div>
               </div>
 
-              {/* Compact Source Verification Banner */}
-              <div
-                className={`p-3 rounded-xl border text-xs flex flex-wrap items-center justify-between gap-2 ${
-                  activeTrack.isCompanyVerified
-                    ? "bg-emerald-50/70 border-emerald-200 text-emerald-950"
-                    : "bg-amber-50/70 border-amber-200 text-amber-950"
-                }`}
-              >
-                <div className="flex items-center gap-2">
-                  {activeTrack.isCompanyVerified ? (
-                    <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
-                  ) : (
-                    <ShieldAlert className="w-4 h-4 text-amber-600 shrink-0" />
-                  )}
-                  <span>
-                    <strong>{activeTrack.verificationStatusLabel}:</strong>{" "}
-                    {activeTrack.sourceSummary}
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-semibold uppercase tracking-wider text-[#2C2B29]">
+                    Primary Goal
                   </span>
+                  <span className="text-[11px] text-[#6E6B64]">Target milestone</span>
                 </div>
-                {activeTrack.missingInformationNotes.length > 0 && (
-                  <span className="text-[11px] font-medium px-2 py-0.5 rounded bg-white/80 border border-amber-300/80">
-                    {activeTrack.missingInformationNotes[0]}
-                  </span>
+                <div className="grid grid-cols-3 gap-2">
+                  {(["Internship", "Placement", "Higher studies"] as const).map((g) => (
+                    <button
+                      key={g}
+                      type="button"
+                      onClick={() => updateFormField("goal", g)}
+                      className={`py-2.5 px-3 rounded-lg text-xs font-semibold border transition-colors cursor-pointer ${
+                        form.goal === g
+                          ? "bg-[#141413] text-[#FBF9F5] border-[#141413]"
+                          : "bg-[#FBF9F5] text-[#2C2B29] border-[#141413]/20 hover:bg-[#F3EFE6]"
+                      }`}
+                    >
+                      {g}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <SearchableAutocomplete
+                label="Target Job Role"
+                sublabel="Search or enter custom"
+                value={form.role}
+                options={CURATED_ROLES}
+                placeholder="e.g., Backend Developer, ML Engineer, Data Analyst..."
+                onChange={(val) => updateFormField("role", val)}
+              />
+
+              <div className="space-y-2">
+                <SearchableAutocomplete
+                  label="Target Company (Optional)"
+                  sublabel={
+                    form.goal === "Higher studies"
+                      ? "Optional for Higher studies"
+                      : "Curated or Other"
+                  }
+                  value={form.companySelection}
+                  options={["", ...CURATED_COMPANIES]}
+                  placeholder="Optional — Google, Microsoft, Razorpay, Qualcomm, Other..."
+                  allowCustomText={false}
+                  onChange={(val) => updateFormField("companySelection", val)}
+                />
+                {form.companySelection === "Other" && (
+                  <input
+                    type="text"
+                    value={form.customCompany}
+                    onChange={(e) => updateFormField("customCompany", e.target.value)}
+                    placeholder="Enter custom company name..."
+                    className="w-full px-3.5 py-2 text-xs bg-[#FBF9F5] border border-[#141413]/25 rounded-lg focus:outline-none focus:border-[#0F5C6E]"
+                  />
                 )}
               </div>
 
-              {/* Role-Critical Skills List with 3 Simple Choices */}
-              <div className="space-y-2.5">
-                <div className="flex items-center justify-between">
-                  <h2 className="text-xs font-bold uppercase tracking-wider text-slate-700">
-                    Role-Critical Required Skills ({activeTrack.required.length})
-                  </h2>
-                  <span className="text-xs text-slate-500">
-                    {gapAnalysis.requiredReadyCount} of {gapAnalysis.requiredTotalCount} marked “Know it”
+              {/* Source Verification Status Box */}
+              <div className="p-4 rounded-xl bg-[#FBF9F5] border border-[#141413]/15 flex flex-col justify-between space-y-2">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-xs font-semibold text-[#141413] flex items-center gap-1.5">
+                    {activeTrack.isCompanyVerified ? (
+                      <ShieldCheck className="w-4 h-4 text-[#0F5C6E] shrink-0" />
+                    ) : (
+                      <ShieldAlert className="w-4 h-4 text-amber-700 shrink-0" />
+                    )}
+                    <span>{activeTrack.verificationStatusLabel}</span>
                   </span>
+                  <button
+                    type="button"
+                    onClick={() => setShowJdInputSection((prev) => !prev)}
+                    className="text-xs font-semibold text-[#0F5C6E] hover:underline cursor-pointer"
+                  >
+                    {showJdInputSection ? "Hide job source" : "Paste JD / URL"}
+                  </button>
+                </div>
+                <p className="text-xs text-[#5C5953] leading-relaxed">
+                  {activeTrack.sourceSummary}
+                </p>
+              </div>
+            </div>
+
+            {/* Optional Job Description / Source URL Extractor */}
+            {showJdInputSection && (
+              <div className="p-6 rounded-2xl bg-[#F3EFE6] border border-[#141413]/15 space-y-4">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div>
+                    <h2 className="font-serif text-lg text-[#141413]">
+                      Job Description & Source Verification (Optional)
+                    </h2>
+                    <p className="text-xs text-[#5C5953]">
+                      Paste a public job description to extract verified skills. VisionPath never guesses company requirements from a company name alone.
+                    </p>
+                  </div>
+                  <div className="flex flex-wrap gap-1.5">
+                    {Object.keys(SAMPLE_JDS).map((sampleRole) => (
+                      <button
+                        key={sampleRole}
+                        type="button"
+                        onClick={() => {
+                          updateFormField("role", sampleRole);
+                          updateFormField("jdText", SAMPLE_JDS[sampleRole]);
+                        }}
+                        className="px-2.5 py-1 rounded text-xs font-medium bg-[#FBF9F5] border border-[#141413]/20 text-[#2C2B29] hover:border-[#0F5C6E] cursor-pointer"
+                      >
+                        Sample {sampleRole} JD
+                      </button>
+                    ))}
+                  </div>
                 </div>
 
-                <div className="divide-y divide-slate-200 border border-slate-200 rounded-xl overflow-hidden bg-white">
-                  {activeTrack.required.map((skill) => {
-                    const currentSimple: SimpleSkillLevel = normalizeSkillLevel(levels[skill]);
-                    const detail =
-                      activeTrack.skillDetails.find(
-                        (d) => d.skill.toLowerCase() === skill.toLowerCase()
-                      ) || getSkillDetail(skill, "Required", form.role);
-                    const isExpanded = Boolean(expandedWhySkill[skill]);
+                <input
+                  type="url"
+                  value={form.jobSourceUrl}
+                  onChange={(e) => updateFormField("jobSourceUrl", e.target.value)}
+                  placeholder="Optional public careers URL (e.g., https://careers.company.com/job/...)"
+                  className="w-full px-3.5 py-2 text-xs bg-[#FBF9F5] border border-[#141413]/25 rounded-lg focus:outline-none focus:border-[#0F5C6E]"
+                />
 
-                    return (
-                      <div key={skill} className="p-3.5 hover:bg-slate-50/70 transition-colors">
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                          <div className="space-y-0.5">
-                            <div className="flex items-center gap-2">
-                              <span className="text-sm font-bold text-slate-900">{skill}</span>
-                              <span className="text-[10px] font-bold uppercase px-1.5 py-0.5 rounded bg-indigo-50 text-indigo-700 border border-indigo-200">
-                                Required
-                              </span>
-                              <button
-                                type="button"
-                                onClick={() =>
-                                  setExpandedWhySkill((prev) => ({
-                                    ...prev,
-                                    [skill]: !prev[skill],
-                                  }))
-                                }
-                                className="text-[11px] font-medium text-slate-500 hover:text-indigo-600 cursor-pointer"
-                              >
-                                {isExpanded ? "Hide why" : "Why & proof?"}
-                              </button>
-                            </div>
-                            {isExpanded && (
-                              <div className="text-xs text-slate-600 pt-1 space-y-0.5">
-                                <p>
-                                  <strong className="text-slate-800">Why it matters:</strong>{" "}
-                                  {detail.whyItMatters}
-                                </p>
-                                <p>
-                                  <strong className="text-slate-800">Expected proof:</strong>{" "}
-                                  {detail.expectedEvidence}
-                                </p>
-                              </div>
-                            )}
+                <textarea
+                  rows={4}
+                  value={form.jdText}
+                  onChange={(e) => updateFormField("jdText", e.target.value)}
+                  placeholder="Paste the job description text here..."
+                  className="w-full p-3.5 text-xs bg-[#FBF9F5] border border-[#141413]/25 rounded-lg focus:outline-none focus:border-[#0F5C6E] font-mono"
+                />
+
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={handleExtractJobDescription}
+                      disabled={isExtractingJd}
+                      className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold bg-[#0F5C6E] text-white hover:bg-[#0B4654] disabled:opacity-50 cursor-pointer"
+                    >
+                      <Sparkles className="w-3.5 h-3.5" />
+                      <span>{isExtractingJd ? "Extracting..." : "Verify Skills from JD"}</span>
+                    </button>
+                    {form.jdText.trim() && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          updateFormField("jdText", "");
+                          setGeminiExtractedTrack(null);
+                          setJdNotice(null);
+                        }}
+                        className="px-3 py-2 rounded-lg text-xs font-medium text-[#5C5953] hover:text-[#141413] cursor-pointer"
+                      >
+                        Clear
+                      </button>
+                    )}
+                  </div>
+                  {jdNotice && (
+                    <span className="text-xs font-medium text-[#0F5C6E]">{jdNotice.message}</span>
+                  )}
+                </div>
+              </div>
+            )}
+
+            <div className="flex items-center justify-between pt-4 border-t border-[#141413]/15">
+              <button
+                type="button"
+                onClick={() => setStep(0)}
+                className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#4A4843] hover:text-[#141413] cursor-pointer"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                <span>Back to Welcome</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setStep(2)}
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-lg text-sm font-semibold bg-[#0F5C6E] text-white hover:bg-[#0B4654] transition-colors cursor-pointer"
+              >
+                <span>Proceed to Skill Check ({activeTrack.required.length} Core Skills)</span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
+            </div>
+          </section>
+        )}
+
+        {/* =========================================================
+            SCREEN 3: SKILL CHECK
+            Show role-critical skills as simple cards with three choices:
+            “Know it”, “Learning it”, “Need to learn”.
+           ========================================================= */}
+        {step === 2 && (
+          <section className="space-y-8">
+            <div className="flex flex-wrap items-end justify-between gap-4 pb-6 border-b border-[#141413]/15">
+              <div className="space-y-1.5">
+                <span className="text-xs font-mono uppercase tracking-[0.16em] text-[#0F5C6E]">
+                  03 / Skill Check · {form.role}
+                </span>
+                <h1 className="font-serif text-3xl sm:text-4xl text-[#141413]">
+                  Assess your role-critical skills.
+                </h1>
+                <p className="text-sm text-[#5C5953]">
+                  Select <strong>Know it</strong>, <strong>Learning it</strong>, or <strong>Need to learn</strong> for each required skill.
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2.5">
+                <button
+                  type="button"
+                  onClick={() => setStep(1)}
+                  className="px-4 py-2.5 rounded-lg text-xs font-semibold border border-[#141413]/20 text-[#2C2B29] hover:bg-[#F3EFE6] cursor-pointer"
+                >
+                  Edit Goal
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setStep(3)}
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold bg-[#0F5C6E] text-white hover:bg-[#0B4654] transition-colors cursor-pointer"
+                >
+                  <span>View Action Plan</span>
+                  <ArrowRight className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+
+            {/* Source Note Strip */}
+            <div className="py-3 px-4 rounded-xl bg-[#F3EFE6] border border-[#141413]/15 flex flex-wrap items-center justify-between gap-2 text-xs text-[#2C2B29]">
+              <div className="flex items-center gap-2">
+                {activeTrack.isCompanyVerified ? (
+                  <ShieldCheck className="w-4 h-4 text-[#0F5C6E] shrink-0" />
+                ) : (
+                  <ShieldAlert className="w-4 h-4 text-amber-700 shrink-0" />
+                )}
+                <span>
+                  <strong>{activeTrack.verificationStatusLabel}:</strong> {activeTrack.sourceSummary}
+                </span>
+              </div>
+              <span className="font-mono font-semibold text-[#0F5C6E]">
+                {gapAnalysis.requiredReadyCount}/{gapAnalysis.requiredTotalCount} Known
+              </span>
+            </div>
+
+            {/* Role-Critical Skill Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {activeTrack.required.map((skill) => {
+                const currentSimple: SimpleSkillLevel = normalizeSkillLevel(levels[skill]);
+                const detail =
+                  activeTrack.skillDetails.find(
+                    (d) => d.skill.toLowerCase() === skill.toLowerCase()
+                  ) || getSkillDetail(skill, "Required", form.role);
+                const isExpanded = Boolean(expandedWhySkill[skill]);
+
+                return (
+                  <div
+                    key={skill}
+                    className="p-5 rounded-xl bg-[#F3EFE6]/55 border border-[#141413]/15 flex flex-col justify-between space-y-4"
+                  >
+                    <div className="space-y-1.5">
+                      <div className="flex items-center justify-between gap-2">
+                        <h2 className="font-serif text-xl text-[#141413]">{skill}</h2>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setExpandedWhySkill((prev) => ({
+                              ...prev,
+                              [skill]: !prev[skill],
+                            }))
+                          }
+                          className="text-[11px] font-medium text-[#0F5C6E] hover:underline cursor-pointer"
+                        >
+                          {isExpanded ? "Hide detail" : "Why this matters"}
+                        </button>
+                      </div>
+                      <p className="text-xs text-[#5C5953]">
+                        Expected proof: {detail.expectedEvidence}
+                      </p>
+                      {isExpanded && (
+                        <p className="text-xs text-[#2C2B29] pt-1.5 border-t border-[#141413]/10">
+                          {detail.whyItMatters}
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="grid grid-cols-3 gap-2">
+                      {SIMPLE_SKILL_LEVELS.map((choice) => {
+                        const selected = currentSimple === choice;
+                        const activeStyle =
+                          choice === "Know it"
+                            ? "bg-[#0F5C6E] text-white border-[#0F5C6E]"
+                            : choice === "Learning it"
+                              ? "bg-[#B86B14] text-white border-[#B86B14]"
+                              : "bg-[#141413] text-[#FBF9F5] border-[#141413]";
+
+                        return (
+                          <button
+                            key={choice}
+                            type="button"
+                            onClick={() =>
+                              setLevels((prev) => ({ ...prev, [skill]: choice }))
+                            }
+                            className={`py-2 px-2.5 rounded-lg text-xs font-semibold border transition-colors cursor-pointer ${
+                              selected
+                                ? activeStyle
+                                : "bg-[#FBF9F5] text-[#2C2B29] border-[#141413]/20 hover:bg-[#F3EFE6]"
+                            }`}
+                          >
+                            {choice}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Optional Preferred / Bonus Skills Accordion */}
+            <div className="pt-2 border-t border-[#141413]/15">
+              <button
+                type="button"
+                onClick={() => setShowBonusSkillsOnCheck((prev) => !prev)}
+                className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#0F5C6E] hover:underline cursor-pointer"
+              >
+                {showBonusSkillsOnCheck ? (
+                  <ChevronDown className="w-4 h-4" />
+                ) : (
+                  <ChevronRight className="w-4 h-4" />
+                )}
+                <span>
+                  {showBonusSkillsOnCheck
+                    ? "Hide preferred / bonus skills"
+                    : `Optional: Assess ${activeTrack.preferred.length} preferred skills or add custom skill`}
+                </span>
+              </button>
+
+              {showBonusSkillsOnCheck && (
+                <div className="mt-4 space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {activeTrack.preferred.map((skill) => {
+                      const currentSimple = normalizeSkillLevel(levels[skill]);
+                      return (
+                        <div
+                          key={skill}
+                          className="p-4 rounded-xl bg-[#FBF9F5] border border-[#141413]/15 flex items-center justify-between gap-3"
+                        >
+                          <div>
+                            <span className="text-sm font-semibold text-[#141413]">{skill}</span>
+                            <span className="block text-[10px] uppercase tracking-wider text-[#6E6B64]">
+                              Preferred
+                            </span>
                           </div>
-
-                          {/* Three Simple Choices: Know it | Learning it | Need to learn */}
-                          <div className="grid grid-cols-3 gap-1.5 shrink-0 sm:w-80">
+                          <div className="flex gap-1.5">
                             {SIMPLE_SKILL_LEVELS.map((choice) => {
                               const selected = currentSimple === choice;
-                              const activeStyle =
-                                choice === "Know it"
-                                  ? "bg-emerald-600 text-white border-emerald-600"
-                                  : choice === "Learning it"
-                                    ? "bg-amber-500 text-white border-amber-500"
-                                    : "bg-rose-600 text-white border-rose-600";
-
                               return (
                                 <button
                                   key={choice}
@@ -1449,10 +1468,10 @@ export default function App() {
                                   onClick={() =>
                                     setLevels((prev) => ({ ...prev, [skill]: choice }))
                                   }
-                                  className={`py-1.5 px-2.5 rounded-lg text-xs font-semibold border transition-all cursor-pointer ${
+                                  className={`px-2.5 py-1.5 rounded text-xs font-semibold border cursor-pointer ${
                                     selected
-                                      ? `${activeStyle} shadow-xs`
-                                      : "bg-white text-slate-700 border-slate-300 hover:bg-slate-100"
+                                      ? "bg-[#0F5C6E] text-white border-[#0F5C6E]"
+                                      : "bg-[#FBF9F5] text-[#4A4843] border-[#141413]/20"
                                   }`}
                                 >
                                   {choice}
@@ -1461,913 +1480,650 @@ export default function App() {
                             })}
                           </div>
                         </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* Optional Toggle for Preferred / Bonus Skills & Adding Custom Skills */}
-              <div className="pt-2">
-                <button
-                  type="button"
-                  onClick={() => setShowBonusSkillsOnCheck((prev) => !prev)}
-                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-indigo-700 hover:text-indigo-900 cursor-pointer"
-                >
-                  {showBonusSkillsOnCheck ? (
-                    <ChevronDown className="w-4 h-4" />
-                  ) : (
-                    <ChevronRight className="w-4 h-4" />
-                  )}
-                  <span>
-                    {showBonusSkillsOnCheck
-                      ? "Hide Preferred / Bonus Skills & Role Details"
-                      : `Optional: Rate ${activeTrack.preferred.length} Preferred / Bonus Skills or Add Custom Skill`}
-                  </span>
-                </button>
-
-                {showBonusSkillsOnCheck && (
-                  <div className="mt-3 space-y-4 p-4 rounded-xl bg-slate-50 border border-slate-200">
-                    {activeTrack.preferred.length > 0 && (
-                      <div className="divide-y divide-slate-200 border border-slate-200 rounded-xl overflow-hidden bg-white">
-                        {activeTrack.preferred.map((skill) => {
-                          const currentSimple = normalizeSkillLevel(levels[skill]);
-                          return (
-                            <div
-                              key={skill}
-                              className="p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5"
-                            >
-                              <div className="flex items-center gap-2">
-                                <span className="text-xs font-bold text-slate-800">{skill}</span>
-                                <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-slate-100 text-slate-600">
-                                  Preferred
-                                </span>
-                              </div>
-                              <div className="grid grid-cols-3 gap-1.5 shrink-0 sm:w-80">
-                                {SIMPLE_SKILL_LEVELS.map((choice) => {
-                                  const selected = currentSimple === choice;
-                                  const activeStyle =
-                                    choice === "Know it"
-                                      ? "bg-emerald-600 text-white border-emerald-600"
-                                      : choice === "Learning it"
-                                        ? "bg-amber-500 text-white border-amber-500"
-                                        : "bg-rose-600 text-white border-rose-600";
-                                  return (
-                                    <button
-                                      key={choice}
-                                      type="button"
-                                      onClick={() =>
-                                        setLevels((prev) => ({ ...prev, [skill]: choice }))
-                                      }
-                                      className={`py-1.5 px-2 rounded-lg text-xs font-semibold border cursor-pointer ${
-                                        selected
-                                          ? activeStyle
-                                          : "bg-white text-slate-700 border-slate-300 hover:bg-slate-100"
-                                      }`}
-                                    >
-                                      {choice}
-                                    </button>
-                                  );
-                                })}
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    )}
-
-                    {/* Add Custom Skill */}
-                    <form onSubmit={handleAddManualSkill} className="flex flex-wrap gap-2">
-                      <input
-                        type="text"
-                        value={newSkillInput}
-                        onChange={(e) => setNewSkillInput(e.target.value)}
-                        placeholder="Add custom skill (e.g., Docker, GraphQL, ANSYS)..."
-                        className="flex-1 min-w-[200px] px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg"
-                      />
-                      <select
-                        value={newSkillTier}
-                        onChange={(e) =>
-                          setNewSkillTier(e.target.value as "Required" | "Preferred")
-                        }
-                        className="px-2.5 py-1.5 text-xs bg-white border border-slate-300 rounded-lg"
-                      >
-                        <option value="Required">Required</option>
-                        <option value="Preferred">Preferred</option>
-                      </select>
-                      <button
-                        type="submit"
-                        className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-900 text-white hover:bg-slate-800 cursor-pointer"
-                      >
-                        + Add Skill
-                      </button>
-                    </form>
+                      );
+                    })}
                   </div>
-                )}
-              </div>
 
-              <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
-                <button
-                  type="button"
-                  onClick={() => setStep(0)}
-                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 cursor-pointer"
-                >
-                  <ArrowLeft className="w-4 h-4" />
-                  <span>Back to Goal</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setStep(2)}
-                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold bg-indigo-600 text-white hover:bg-indigo-700 transition-colors cursor-pointer shadow-xs"
-                >
-                  <span>Build My Action Plan</span>
-                  <ArrowRight className="w-4 h-4" />
-                </button>
-              </div>
+                  <form onSubmit={handleAddManualSkill} className="flex flex-wrap gap-2">
+                    <input
+                      type="text"
+                      value={newSkillInput}
+                      onChange={(e) => setNewSkillInput(e.target.value)}
+                      placeholder="Add custom skill..."
+                      className="px-3.5 py-2 text-xs bg-[#FBF9F5] border border-[#141413]/25 rounded-lg"
+                    />
+                    <select
+                      value={newSkillTier}
+                      onChange={(e) =>
+                        setNewSkillTier(e.target.value as "Required" | "Preferred")
+                      }
+                      className="px-3 py-2 text-xs bg-[#FBF9F5] border border-[#141413]/25 rounded-lg"
+                    >
+                      <option value="Required">Required</option>
+                      <option value="Preferred">Preferred</option>
+                    </select>
+                    <button
+                      type="submit"
+                      className="px-4 py-2 rounded-lg text-xs font-semibold bg-[#141413] text-[#FBF9F5] cursor-pointer"
+                    >
+                      + Add Skill
+                    </button>
+                  </form>
+                </div>
+              )}
+            </div>
+
+            <div className="flex items-center justify-between pt-4 border-t border-[#141413]/15">
+              <button
+                type="button"
+                onClick={() => setStep(1)}
+                className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#4A4843] hover:text-[#141413] cursor-pointer"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                <span>Back to Goal</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setStep(3)}
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-lg text-sm font-semibold bg-[#0F5C6E] text-white hover:bg-[#0B4654] transition-colors cursor-pointer"
+              >
+                <span>Generate Action Plan</span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
             </div>
           </section>
         )}
 
         {/* =========================================================
-            STEP 2: ACTION PLAN (Readiness Signal, Visual Gap Chart, Top 3 Next Actions,
-            Year-Wise BTech Plan, 30-Day Weekly Checklist, and Optional Deep Tools)
+            SCREEN 4: ACTION PLAN
+            Large readiness score, current-vs-target skill bars, top three gaps,
+            and one practical project.
            ========================================================= */}
-        {step === 2 && (
-          <section className="space-y-5">
-            {/* 1. Large Readiness Signal & Context Banner (No Hiring Predictions!) */}
-            <div className="bg-white rounded-2xl border border-slate-200 p-5 sm:p-6 shadow-xs space-y-4">
-              <div className="flex flex-wrap items-start justify-between gap-4">
-                <div className="space-y-1">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="text-[11px] font-bold uppercase tracking-wider text-indigo-600">
-                      Step 3 of 3 · Personalized Action Plan
-                    </span>
-                    <span
-                      className={`text-[11px] font-semibold px-2 py-0.5 rounded-md border ${
-                        activeTrack.isCompanyVerified
-                          ? "bg-emerald-50 text-emerald-800 border-emerald-200"
-                          : "bg-amber-50 text-amber-800 border-amber-200"
-                      }`}
-                    >
-                      {activeTrack.verificationStatusLabel}
-                    </span>
-                  </div>
-                  <h1 className="text-xl sm:text-2xl font-display font-bold text-slate-900">
-                    {form.year} BTech Plan for {form.role}
-                    {effectiveCompany ? ` (${effectiveCompany})` : ""}
-                  </h1>
-                  <p className="text-xs sm:text-sm text-slate-600">
-                    Here is your role skill coverage, current-vs-target gap chart, top 3 next actions, and year-wise BTech roadmap.
-                  </p>
+        {step === 3 && (
+          <section className="space-y-10">
+            {/* Editorial Header + Large Readiness Score */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-end pb-8 border-b border-[#141413]/15">
+              <div className="lg:col-span-8 space-y-2">
+                <div className="flex flex-wrap items-center gap-2.5">
+                  <span className="text-xs font-mono uppercase tracking-[0.16em] text-[#0F5C6E]">
+                    04 / Action Plan · {form.branch.split(" (")[0]} · {form.year}
+                  </span>
+                  <span className="text-xs px-2.5 py-0.5 rounded bg-[#F3EFE6] border border-[#141413]/15 text-[#2C2B29]">
+                    {activeTrack.verificationStatusLabel}
+                  </span>
                 </div>
-
-                <div className="flex flex-wrap items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setStep(1)}
-                    className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 cursor-pointer"
-                  >
-                    <ArrowLeft className="w-3.5 h-3.5" />
-                    <span>Update Skill Check</span>
-                  </button>
+                <h1 className="font-serif text-3xl sm:text-5xl text-[#141413] leading-tight">
+                  {form.role}
+                  {effectiveCompany ? ` — ${effectiveCompany}` : ""}
+                </h1>
+                <p className="text-sm text-[#4A4843] max-w-2xl">
+                  {activeGuidance.executiveSummary}
+                </p>
+                <div className="pt-2 flex flex-wrap items-center gap-2.5">
                   <button
                     type="button"
                     onClick={handlePersonalizeWithGemini}
                     disabled={isPersonalizing}
-                    className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50 cursor-pointer shadow-xs"
+                    className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold bg-[#0F5C6E] text-white hover:bg-[#0B4654] disabled:opacity-50 cursor-pointer"
                   >
                     <Sparkles className="w-3.5 h-3.5" />
                     <span>
                       {isPersonalizing ? "Personalizing..." : "Personalize with Gemini"}
                     </span>
                   </button>
+                  <button
+                    type="button"
+                    onClick={() => setStep(2)}
+                    className="px-3.5 py-2 rounded-lg text-xs font-semibold border border-[#141413]/20 text-[#2C2B29] hover:bg-[#F3EFE6] cursor-pointer"
+                  >
+                    Update Skill Check
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setStep(4)}
+                    className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-semibold bg-[#141413] text-[#FBF9F5] hover:bg-[#2C2B29] cursor-pointer"
+                  >
+                    <span>4-Year Roadmap</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </button>
                 </div>
+                {guidanceNotice && (
+                  <p className="text-xs text-[#0F5C6E] font-medium pt-1">
+                    {guidanceNotice.message}
+                  </p>
+                )}
               </div>
 
-              {guidanceNotice && (
-                <div className="px-3 py-2 rounded-lg bg-indigo-50 border border-indigo-200 text-xs font-medium text-indigo-900 flex items-center justify-between">
-                  <span>{guidanceNotice.message}</span>
-                </div>
-              )}
-
-              {/* Large Readiness Signal Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5 pt-1">
-                <div
-                  className={`p-4 rounded-xl border ${
-                    gapAnalysis.readinessSignal.tone === "emerald"
-                      ? "bg-emerald-50/70 border-emerald-200"
-                      : gapAnalysis.readinessSignal.tone === "amber"
-                        ? "bg-amber-50/70 border-amber-200"
-                        : "bg-rose-50/70 border-rose-200"
-                  }`}
-                >
-                  <div className="flex items-baseline justify-between">
-                    <span className="text-xs font-bold uppercase tracking-wider text-slate-700">
-                      Role Skill Coverage
-                    </span>
-                    <span className="text-2xl font-mono font-extrabold text-slate-900">
-                      {gapAnalysis.readiness}%
-                    </span>
-                  </div>
-                  <div className="w-full h-2.5 bg-white/90 rounded-full overflow-hidden my-2 border border-slate-200/80">
-                    <div
-                      className={`h-full transition-all duration-300 ${
-                        gapAnalysis.readinessSignal.tone === "emerald"
-                          ? "bg-emerald-600"
-                          : gapAnalysis.readinessSignal.tone === "amber"
-                            ? "bg-amber-500"
-                            : "bg-rose-600"
-                      }`}
-                      style={{ width: `${gapAnalysis.readiness}%` }}
-                    />
-                  </div>
-                  <div className="text-xs font-bold text-slate-900">
+              {/* Large Editorial Readiness Score Block */}
+              <div className="lg:col-span-4 p-6 rounded-2xl bg-[#F3EFE6] border border-[#141413]/15 flex flex-col justify-between space-y-3">
+                <div className="flex items-baseline justify-between">
+                  <span className="text-xs uppercase tracking-[0.14em] text-[#5C5953] font-semibold">
+                    Role Skill Coverage
+                  </span>
+                  <span className="text-xs font-semibold text-[#0F5C6E]">
                     {gapAnalysis.readinessSignal.label}
-                  </div>
-                  <p className="text-[11px] text-slate-600 mt-0.5">
-                    {gapAnalysis.readinessSignal.summary}
-                  </p>
+                  </span>
                 </div>
-
-                {/* Gap Breakdown Summary */}
-                <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 flex flex-col justify-between">
-                  <div className="text-xs font-bold uppercase tracking-wider text-slate-700">
-                    Skill Gap Breakdown
-                  </div>
-                  <div className="grid grid-cols-3 gap-2 my-2">
-                    <div className="p-2 rounded-lg bg-rose-50 border border-rose-200 text-center">
-                      <div className="text-lg font-mono font-bold text-rose-700">
-                        {gapAnalysis.highGapCount}
-                      </div>
-                      <div className="text-[10px] font-semibold text-rose-800">High Gap</div>
-                    </div>
-                    <div className="p-2 rounded-lg bg-amber-50 border border-amber-200 text-center">
-                      <div className="text-lg font-mono font-bold text-amber-700">
-                        {gapAnalysis.mediumGapCount}
-                      </div>
-                      <div className="text-[10px] font-semibold text-amber-800">Medium Gap</div>
-                    </div>
-                    <div className="p-2 rounded-lg bg-emerald-50 border border-emerald-200 text-center">
-                      <div className="text-lg font-mono font-bold text-emerald-700">
-                        {gapAnalysis.lowGapCount}
-                      </div>
-                      <div className="text-[10px] font-semibold text-emerald-800">Low Gap</div>
-                    </div>
-                  </div>
-                  <p className="text-[11px] text-slate-500">
-                    Measures current skill coverage vs role requirements (not a hiring prediction).
-                  </p>
+                <div className="font-serif text-5xl sm:text-6xl text-[#141413] tabular-nums">
+                  {gapAnalysis.readiness}%
                 </div>
-
-                {/* 30-Day Checklist Completion Signal */}
-                <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 flex flex-col justify-between">
-                  <div className="flex items-baseline justify-between">
-                    <span className="text-xs font-bold uppercase tracking-wider text-slate-700">
-                      30-Day Plan Progress
-                    </span>
-                    <span className="text-2xl font-mono font-extrabold text-indigo-700">
-                      {thirtyDayCompletionPct}%
-                    </span>
-                  </div>
-                  <div className="w-full h-2.5 bg-white rounded-full overflow-hidden my-2 border border-slate-200">
-                    <div
-                      className="h-full bg-indigo-600 transition-all duration-300"
-                      style={{ width: `${thirtyDayCompletionPct}%` }}
-                    />
-                  </div>
-                  <div className="text-xs font-bold text-slate-900">
-                    {completedThirtyDayCount} of {allThirtyDayTasks.length} tasks completed
-                  </div>
-                  <p className="text-[11px] text-slate-600 mt-0.5">
-                    Current stage: <strong>{currentYearStage.yearLabel}</strong>
-                  </p>
+                <div className="w-full h-2 bg-[#141413]/10 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-[#0F5C6E] transition-all duration-300"
+                    style={{ width: `${gapAnalysis.readiness}%` }}
+                  />
+                </div>
+                <div className="flex items-center justify-between text-xs text-[#5C5953] pt-1 border-t border-[#141413]/10">
+                  <span>{gapAnalysis.requiredReadyCount} of {gapAnalysis.requiredTotalCount} core skills known</span>
+                  <span className="font-mono">{gapAnalysis.highGapCount} high gaps</span>
                 </div>
               </div>
             </div>
 
-            {/* 2. Top 3 Next Actions + Prioritized Visual Gap Comparison Chart */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
-              {/* Left 7 Cols: Prioritized Current vs Target Visual Gap Chart */}
-              <div className="lg:col-span-7 bg-white rounded-2xl border border-slate-200 p-5 shadow-xs space-y-4">
-                <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
-                  <div>
-                    <h2 className="text-base font-display font-bold text-slate-900">
-                      Prioritized Skill Gap Chart (Current vs. Target)
-                    </h2>
-                    <p className="text-xs text-slate-600">
-                      Sorted by priority: required skills with the largest gap first, then preferred skills.
-                    </p>
-                  </div>
-
-                  {/* Accessible Legend */}
-                  <div className="flex flex-wrap items-center gap-2 text-[11px] font-semibold">
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-rose-50 text-rose-800 border border-rose-200">
-                      <span className="w-2 h-2 rounded-full bg-rose-600" />
-                      High gap
-                    </span>
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-amber-50 text-amber-800 border border-amber-200">
-                      <span className="w-2 h-2 rounded-full bg-amber-500" />
-                      Medium gap
-                    </span>
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-emerald-50 text-emerald-800 border border-emerald-200">
-                      <span className="w-2 h-2 rounded-full bg-emerald-600" />
-                      Low gap
-                    </span>
-                  </div>
+            {/* Top 3 Priority Gaps + Current-vs-Target Visual Bar Chart */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+              {/* Left 5 Cols: Top Three Gaps */}
+              <div className="lg:col-span-5 space-y-4">
+                <div className="border-b border-[#141413]/15 pb-3">
+                  <span className="text-[11px] font-mono uppercase tracking-[0.16em] text-[#6E6B64]">
+                    Priority Focus
+                  </span>
+                  <h2 className="font-serif text-2xl text-[#141413]">
+                    Top Three Gaps to Close
+                  </h2>
                 </div>
 
-                {/* Horizontal Bar Comparison Rows */}
-                <div className="space-y-3">
-                  {gapAnalysis.skillGaps.map((item) => {
-                    const barColor =
-                      item.gapBand === "High gap"
-                        ? "bg-rose-600"
-                        : item.gapBand === "Medium gap"
-                          ? "bg-amber-500"
-                          : "bg-emerald-600";
-
-                    const badgeStyle =
-                      item.gapBand === "High gap"
-                        ? "bg-rose-50 text-rose-800 border-rose-200"
-                        : item.gapBand === "Medium gap"
-                          ? "bg-amber-50 text-amber-800 border-amber-200"
-                          : "bg-emerald-50 text-emerald-800 border-emerald-200";
+                <div className="space-y-3.5">
+                  {topThreeGaps.map((gap, index) => {
+                    const isExpanded = Boolean(expandedWhyRec[index]);
+                    const tagColor =
+                      gap.gapBand === "High gap"
+                        ? "bg-[#F9E8E6] text-[#9E2A2B] border-[#9E2A2B]/25"
+                        : gap.gapBand === "Medium gap"
+                          ? "bg-[#FDF3E3] text-[#9A5B13] border-[#9A5B13]/25"
+                          : "bg-[#E6F1F3] text-[#0F5C6E] border-[#0F5C6E]/25";
 
                     return (
                       <div
-                        key={item.skill}
-                        className="p-3 rounded-xl bg-slate-50/80 border border-slate-200/90 space-y-2"
+                        key={gap.skill}
+                        className="p-5 rounded-xl bg-[#F3EFE6]/60 border border-[#141413]/15 space-y-2.5"
                       >
-                        <div className="flex flex-wrap items-center justify-between gap-2">
-                          <div className="flex items-center gap-2">
-                            <span className="text-xs sm:text-sm font-bold text-slate-900">
-                              {item.skill}
+                        <div className="flex items-start justify-between gap-2">
+                          <div>
+                            <span className="font-mono text-[11px] uppercase tracking-wider text-[#6E6B64]">
+                              0{index + 1} · {form.year} Priority
                             </span>
-                            <span
-                              className={`text-[10px] font-bold uppercase px-1.5 py-0.5 rounded ${
-                                item.isRequired
-                                  ? "bg-indigo-50 text-indigo-700 border border-indigo-200"
-                                  : "bg-slate-200/80 text-slate-700"
-                              }`}
-                            >
-                              {item.isRequired ? "Required" : "Preferred"}
-                            </span>
+                            <h3 className="font-serif text-xl text-[#141413]">{gap.skill}</h3>
                           </div>
-
-                          <div className="flex items-center gap-2 text-xs">
-                            <span className="text-[11px] text-slate-600 font-mono">
-                              Current: <strong>{item.currentLevel}</strong> ({item.score}%) / Target:{" "}
-                              <strong>{item.targetScore}%</strong>
-                            </span>
-                            <span
-                              className={`text-[11px] font-bold px-2 py-0.5 rounded border ${badgeStyle}`}
-                            >
-                              {item.gapBand}
-                            </span>
-                          </div>
+                          <span className={`text-[11px] font-semibold px-2.5 py-0.5 rounded border ${tagColor}`}>
+                            {gap.gapBand}
+                          </span>
                         </div>
 
-                        {/* Visual Comparison Bar: Current Fill vs Target Marker */}
-                        <div className="relative h-3 w-full bg-slate-200 rounded-full overflow-hidden">
-                          {/* Target level indicator background */}
-                          <div
-                            className="absolute inset-y-0 left-0 bg-slate-300/60 border-r-2 border-slate-700"
-                            style={{ width: `${item.targetScore}%` }}
-                            title={`Target Level: ${item.targetScore}%`}
-                          />
-                          {/* Student current level bar */}
-                          <div
-                            className={`relative h-full rounded-full transition-all duration-300 ${barColor}`}
-                            style={{ width: `${ Math.max(6, item.score) }%` }}
-                          />
-                        </div>
+                        <p className="text-xs text-[#2C2B29]">
+                          <strong>Missing:</strong> {gap.whatIsMissing}
+                        </p>
+                        <p className="text-xs text-[#4A4843]">
+                          <strong>Evidence to create:</strong> {gap.expectedEvidence}
+                        </p>
 
-                        {/* Quick inline switcher so student can update level right from chart */}
-                        <div className="flex flex-wrap items-center justify-between gap-2 pt-0.5 text-[11px] text-slate-600">
-                          <span className="truncate max-w-md">{item.whatIsMissing}</span>
-                          <div className="flex items-center gap-1 shrink-0">
-                            {SIMPLE_SKILL_LEVELS.map((lvl) => (
-                              <button
-                                key={lvl}
-                                type="button"
-                                onClick={() =>
-                                  setLevels((prev) => ({ ...prev, [item.skill]: lvl }))
-                                }
-                                className={`px-1.5 py-0.5 rounded text-[10px] font-semibold border cursor-pointer ${
-                                  item.currentLevel === lvl
-                                    ? "bg-slate-900 text-white border-slate-900"
-                                    : "bg-white text-slate-600 border-slate-200 hover:bg-slate-100"
-                                }`}
-                              >
-                                {lvl}
-                              </button>
-                            ))}
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setExpandedWhyRec((prev) => ({
+                              ...prev,
+                              [index]: !prev[index],
+                            }))
+                          }
+                          className="text-xs font-semibold text-[#0F5C6E] hover:underline inline-flex items-center gap-1 cursor-pointer"
+                        >
+                          {isExpanded ? (
+                            <ChevronDown className="w-3.5 h-3.5" />
+                          ) : (
+                            <ChevronRight className="w-3.5 h-3.5" />
+                          )}
+                          <span>Why this recommendation?</span>
+                        </button>
+
+                        {isExpanded && (
+                          <div className="pt-2 border-t border-[#141413]/10 text-xs text-[#4A4843] space-y-1">
+                            <p>{gap.whyItMatters}</p>
+                            <p className="text-[#0F5C6E] font-medium">{gap.nextAction}</p>
                           </div>
-                        </div>
+                        )}
                       </div>
                     );
                   })}
                 </div>
               </div>
 
-              {/* Right 5 Cols: Exactly Three Priority Next Actions with Compact Explanation */}
-              <div className="lg:col-span-5 bg-white rounded-2xl border border-slate-200 p-5 shadow-xs space-y-4 flex flex-col justify-between">
-                <div className="space-y-3.5">
-                  <div className="border-b border-slate-100 pb-3">
-                    <h2 className="text-base font-display font-bold text-slate-900">
-                      Top 3 Next Actions (What to Learn First)
+              {/* Right 7 Cols: Prioritized Current-vs-Target Skill Bars */}
+              <div className="lg:col-span-7 space-y-4">
+                <div className="flex flex-wrap items-end justify-between gap-2 border-b border-[#141413]/15 pb-3">
+                  <div>
+                    <span className="text-[11px] font-mono uppercase tracking-[0.16em] text-[#6E6B64]">
+                      Visual Gap Analysis
+                    </span>
+                    <h2 className="font-serif text-2xl text-[#141413]">
+                      Current vs. Target Skill Bars
                     </h2>
-                    <p className="text-xs text-slate-600">
-                      Focused on your top skill gaps and connected to your {form.year} BTech plan.
-                    </p>
                   </div>
 
-                  <div className="space-y-3">
-                    {topThreeGaps.map((gap, index) => {
-                      const isExpanded = Boolean(expandedWhyRec[index]);
-                      const badgeTone =
-                        gap.gapBand === "High gap"
-                          ? "bg-rose-50 text-rose-800 border-rose-200"
-                          : gap.gapBand === "Medium gap"
-                            ? "bg-amber-50 text-amber-800 border-amber-200"
-                            : "bg-emerald-50 text-emerald-800 border-emerald-200";
-
-                      return (
-                        <div
-                          key={gap.skill}
-                          className="p-3.5 rounded-xl border border-slate-200 bg-slate-50/60 space-y-2"
-                        >
-                          <div className="flex items-start justify-between gap-2">
-                            <div>
-                              <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-700">
-                                Action #{index + 1} · {form.year} Priority
-                              </span>
-                              <h3 className="text-sm font-bold text-slate-900">
-                                {gap.skill}
-                              </h3>
-                            </div>
-                            <span
-                              className={`text-[11px] font-bold px-2 py-0.5 rounded border shrink-0 ${badgeTone}`}
-                            >
-                              {gap.gapBand}
-                            </span>
-                          </div>
-
-                          <div className="text-xs space-y-1 text-slate-700">
-                            <p>
-                              <strong className="text-slate-900">What is missing:</strong>{" "}
-                              {gap.whatIsMissing}
-                            </p>
-                            <p>
-                              <strong className="text-slate-900">Evidence needed:</strong>{" "}
-                              {gap.expectedEvidence}
-                            </p>
-                          </div>
-
-                          <div className="pt-1 flex items-center justify-between">
-                            <button
-                              type="button"
-                              onClick={() =>
-                                setExpandedWhyRec((prev) => ({
-                                  ...prev,
-                                  [index]: !prev[index],
-                                }))
-                              }
-                              className="text-[11px] font-semibold text-indigo-700 hover:text-indigo-900 inline-flex items-center gap-1 cursor-pointer"
-                            >
-                              {isExpanded ? (
-                                <ChevronDown className="w-3.5 h-3.5" />
-                              ) : (
-                                <ChevronRight className="w-3.5 h-3.5" />
-                              )}
-                              <span>Why this recommendation?</span>
-                            </button>
-                          </div>
-
-                          {isExpanded && (
-                            <div className="p-2.5 rounded-lg bg-white border border-slate-200 text-xs text-slate-600 space-y-1">
-                              <p>
-                                <strong className="text-slate-800">Why it matters for {form.role}:</strong>{" "}
-                                {gap.whyItMatters}
-                              </p>
-                              <p>
-                                <strong className="text-slate-800">Next step:</strong>{" "}
-                                {gap.nextAction}
-                              </p>
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })}
+                  {/* Small Accessible Legend */}
+                  <div className="flex items-center gap-3 text-[11px] font-medium text-[#4A4843]">
+                    <span className="inline-flex items-center gap-1.5">
+                      <span className="w-2.5 h-2.5 rounded-xs bg-[#B9382C]" />
+                      High gap
+                    </span>
+                    <span className="inline-flex items-center gap-1.5">
+                      <span className="w-2.5 h-2.5 rounded-xs bg-[#C87A19]" />
+                      Medium gap
+                    </span>
+                    <span className="inline-flex items-center gap-1.5">
+                      <span className="w-2.5 h-2.5 rounded-xs bg-[#0F5C6E]" />
+                      Low gap
+                    </span>
                   </div>
                 </div>
 
-                {/* One Practical Role Project Card */}
-                <div className="p-4 rounded-xl bg-indigo-950 text-white space-y-2.5">
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-indigo-800 text-indigo-200">
-                      1 Practical Project to Build
-                    </span>
-                    <span className="text-[11px] text-indigo-200 font-medium">
-                      Covers Top Gaps
-                    </span>
-                  </div>
-                  <h3 className="text-sm font-display font-bold">
-                    {activeGuidance.recommendedProject.title}
-                  </h3>
-                  <p className="text-xs text-indigo-100 leading-relaxed">
-                    {activeGuidance.recommendedProject.summary}
-                  </p>
-                  <div className="pt-1 space-y-1">
-                    <div className="text-[11px] font-semibold text-indigo-200">
-                      Key Milestones & Proof:
-                    </div>
-                    <ul className="text-xs text-indigo-100 space-y-1 list-disc list-inside">
-                      {activeGuidance.recommendedProject.milestones.slice(0, 3).map((m) => (
-                        <li key={m}>{m}</li>
-                      ))}
-                    </ul>
-                  </div>
-                  {activeGuidance.recommendedProject.resourceLinks.length > 0 && (
-                    <div className="pt-2 flex flex-wrap gap-2">
-                      {activeGuidance.recommendedProject.resourceLinks.slice(0, 2).map((link) => (
-                        <a
-                          key={link.url}
-                          href={link.url}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="inline-flex items-center gap-1 text-[11px] font-semibold px-2.5 py-1 rounded bg-white/10 hover:bg-white/20 text-white"
-                        >
-                          <span>{link.label}</span>
-                          <ExternalLink className="w-3 h-3" />
-                        </a>
-                      ))}
-                    </div>
-                  )}
+                <div className="divide-y divide-[#141413]/12 border border-[#141413]/15 rounded-xl bg-[#FBF9F5] px-5 py-2">
+                  {gapAnalysis.skillGaps.map((item) => {
+                    const barColor =
+                      item.gapBand === "High gap"
+                        ? "bg-[#B9382C]"
+                        : item.gapBand === "Medium gap"
+                          ? "bg-[#C87A19]"
+                          : "bg-[#0F5C6E]";
+
+                    return (
+                      <div key={item.skill} className="py-3.5 space-y-2">
+                        <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
+                          <div className="flex items-center gap-2">
+                            <span className="font-semibold text-sm text-[#141413]">
+                              {item.skill}
+                            </span>
+                            <span className="text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded bg-[#F3EFE6] text-[#5C5953]">
+                              {item.isRequired ? "Required" : "Preferred"}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-3 font-mono text-[11px] text-[#4A4843]">
+                            <span>
+                              {item.currentLevel} ({item.score}% / {item.targetScore}%)
+                            </span>
+                            <span className="font-sans font-semibold">{item.gapBand}</span>
+                          </div>
+                        </div>
+
+                        <div className="relative h-2.5 w-full bg-[#E8E3D8] rounded-full overflow-hidden">
+                          <div
+                            className="absolute inset-y-0 left-0 bg-[#141413]/10 border-r-2 border-[#141413]"
+                            style={{ width: `${item.targetScore}%` }}
+                            title={`Target: ${item.targetScore}%`}
+                          />
+                          <div
+                            className={`relative h-full rounded-full transition-all duration-300 ${barColor}`}
+                            style={{ width: `${Math.max(5, item.score)}%` }}
+                          />
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             </div>
 
-            {/* 3. Structured 30-Day Plan (Week 1 to Week 4 Cards with Checkboxes, Outputs & Proof) */}
-            <div className="bg-white rounded-2xl border border-slate-200 p-5 sm:p-6 shadow-xs space-y-4">
-              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-3">
-                <div>
-                  <span className="text-[11px] font-bold uppercase tracking-wider text-indigo-600">
-                    Next 30-Day Execution Plan
-                  </span>
-                  <h2 className="text-base sm:text-lg font-display font-bold text-slate-900">
-                    Week-by-Week Checklist (With Outputs & Evidence to Publish)
-                  </h2>
-                  <p className="text-xs text-slate-600">
-                    Check off tasks as you build. Every week ends with a concrete output and proof artifact.
-                  </p>
-                </div>
+            {/* One Practical Project Section */}
+            <div className="p-6 sm:p-8 rounded-2xl bg-[#F3EFE6] border border-[#141413]/15 grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+              <div className="lg:col-span-7 space-y-2.5">
+                <span className="text-xs font-mono uppercase tracking-[0.16em] text-[#0F5C6E]">
+                  Recommended Portfolio Proof Project
+                </span>
+                <h2 className="font-serif text-2xl sm:text-3xl text-[#141413]">
+                  {activeGuidance.recommendedProject.title}
+                </h2>
+                <p className="text-sm text-[#4A4843] leading-relaxed">
+                  {activeGuidance.recommendedProject.summary}
+                </p>
+                {activeGuidance.recommendedProject.resourceLinks.length > 0 && (
+                  <div className="pt-2 flex flex-wrap gap-2">
+                    {activeGuidance.recommendedProject.resourceLinks.map((link) => (
+                      <a
+                        key={link.url}
+                        href={link.url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-[#FBF9F5] text-[#0F5C6E] border border-[#141413]/15 hover:border-[#0F5C6E]"
+                      >
+                        <span>{link.label}</span>
+                        <ExternalLink className="w-3 h-3" />
+                      </a>
+                    ))}
+                  </div>
+                )}
+              </div>
 
-                <div className="flex items-center gap-3">
-                  <div className="text-right">
-                    <div className="text-xs font-bold text-slate-900">
-                      {completedThirtyDayCount}/{allThirtyDayTasks.length} Tasks Done ({thirtyDayCompletionPct}%)
+              <div className="lg:col-span-5 p-5 rounded-xl bg-[#FBF9F5] border border-[#141413]/15 space-y-2.5">
+                <div className="text-xs font-semibold uppercase tracking-wider text-[#2C2B29]">
+                  Build Milestones & Deliverable
+                </div>
+                <ul className="space-y-1.5 text-xs text-[#4A4843] list-disc list-inside">
+                  {activeGuidance.recommendedProject.milestones.map((m) => (
+                    <li key={m}>{m}</li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between pt-4 border-t border-[#141413]/15">
+              <button
+                type="button"
+                onClick={() => setStep(2)}
+                className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#4A4843] hover:text-[#141413] cursor-pointer"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                <span>Back to Skill Check</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setStep(4)}
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-lg text-sm font-semibold bg-[#0F5C6E] text-white hover:bg-[#0B4654] transition-colors cursor-pointer"
+              >
+                <span>View Four-Year BTech Roadmap</span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
+            </div>
+          </section>
+        )}
+
+        {/* =========================================================
+            SCREEN 5: ROADMAP
+            Show the four-year BTech plan as an editorial timeline with clear sections for:
+            skills, projects, internships, placement preparation, outputs, and evidence.
+           ========================================================= */}
+        {step === 4 && (
+          <section className="space-y-8">
+            <div className="flex flex-wrap items-end justify-between gap-4 pb-6 border-b border-[#141413]/15">
+              <div className="space-y-1.5">
+                <span className="text-xs font-mono uppercase tracking-[0.16em] text-[#0F5C6E]">
+                  05 / Four-Year BTech Roadmap · Adapted to {form.year}
+                </span>
+                <h1 className="font-serif text-3xl sm:text-4xl text-[#141413]">
+                  Year-wise engineering preparation timeline.
+                </h1>
+                <p className="text-sm text-[#5C5953]">
+                  Connecting your {form.role} target to every year of BTech across skills, projects, internships, placement prep, outputs, and evidence.
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2.5">
+                <button
+                  type="button"
+                  onClick={() => setStep(3)}
+                  className="px-4 py-2.5 rounded-lg text-xs font-semibold border border-[#141413]/20 text-[#2C2B29] hover:bg-[#F3EFE6] cursor-pointer"
+                >
+                  Back to Action Plan
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setStep(5)}
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold bg-[#0F5C6E] text-white hover:bg-[#0B4654] transition-colors cursor-pointer"
+                >
+                  <span>Open Progress & Evidence</span>
+                  <ArrowRight className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+
+            {/* Highlighted Active Year Priority Strip */}
+            <div className="p-5 rounded-xl bg-[#E6F1F3] border border-[#0F5C6E]/30 flex flex-wrap items-center justify-between gap-4">
+              <div className="space-y-1">
+                <span className="text-[11px] font-mono uppercase tracking-wider text-[#0F5C6E] font-semibold">
+                  Active Stage · {form.year} ({currentYearStage.yearLabel})
+                </span>
+                <p className="text-sm font-semibold text-[#141413]">
+                  Next 2 Priority Actions:{" "}
+                  {(currentYearStage.priorityActions || currentYearStage.items.slice(0, 2)).join(
+                    "  ·  "
+                  )}
+                </p>
+              </div>
+              <span className="text-xs font-mono font-semibold text-[#0F5C6E]">
+                Target: {form.role}
+              </span>
+            </div>
+
+            {/* Editorial Timeline for Years 1 to 4 */}
+            <div className="relative pl-6 sm:pl-8 border-l border-[#141413]/25 space-y-8">
+              {activeGuidance.yearPlan.map((yr, idx) => {
+                const isCurrent = yr.statusForStudent === "Current Active Year";
+                return (
+                  <div
+                    key={yr.yearLabel}
+                    className={`relative p-6 rounded-2xl border transition-colors ${
+                      isCurrent
+                        ? "bg-[#F3EFE6] border-[#0F5C6E] shadow-xs"
+                        : "bg-[#FBF9F5] border-[#141413]/15"
+                    }`}
+                  >
+                    {/* Timeline Marker Dot */}
+                    <span
+                      className={`absolute -left-[31px] sm:-left-[39px] top-7 w-4 h-4 rounded-full border-2 ${
+                        isCurrent
+                          ? "bg-[#0F5C6E] border-[#FBF9F5] ring-2 ring-[#0F5C6E]"
+                          : "bg-[#FBF9F5] border-[#141413]/40"
+                      }`}
+                    />
+
+                    <div className="flex flex-wrap items-center justify-between gap-2 pb-4 border-b border-[#141413]/12">
+                      <div>
+                        <span className="font-mono text-xs uppercase tracking-wider text-[#0F5C6E] font-semibold">
+                          0{idx + 1} · {yr.statusForStudent}
+                        </span>
+                        <h2 className="font-serif text-2xl text-[#141413]">{yr.yearLabel}</h2>
+                      </div>
+                      <span className="text-xs text-[#5C5953] max-w-md">{yr.objective}</span>
                     </div>
-                    <div className="w-32 h-2 bg-slate-100 rounded-full overflow-hidden mt-1 border border-slate-200">
-                      <div
-                        className="h-full bg-indigo-600 transition-all duration-300"
-                        style={{ width: `${thirtyDayCompletionPct}%` }}
-                      />
+
+                    {/* 6 Clear Editorial Sections per Year */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pt-4 text-xs">
+                      <div className="space-y-1">
+                        <span className="text-[11px] font-mono uppercase tracking-wider text-[#6E6B64] block">
+                          1. Skills
+                        </span>
+                        <p className="text-[#141413] font-medium">{yr.skillsFocus}</p>
+                      </div>
+
+                      <div className="space-y-1">
+                        <span className="text-[11px] font-mono uppercase tracking-wider text-[#6E6B64] block">
+                          2. Projects
+                        </span>
+                        <p className="text-[#141413] font-medium">{yr.projectsFocus}</p>
+                      </div>
+
+                      <div className="space-y-1">
+                        <span className="text-[11px] font-mono uppercase tracking-wider text-[#6E6B64] block">
+                          3. Internships
+                        </span>
+                        <p className="text-[#141413] font-medium">{yr.internshipActions}</p>
+                      </div>
+
+                      <div className="space-y-1">
+                        <span className="text-[11px] font-mono uppercase tracking-wider text-[#6E6B64] block">
+                          4. Placement Preparation
+                        </span>
+                        <p className="text-[#141413] font-medium">{yr.placementPrep}</p>
+                      </div>
+
+                      <div className="space-y-1">
+                        <span className="text-[11px] font-mono uppercase tracking-wider text-[#6E6B64] block">
+                          5. Measurable Outputs
+                        </span>
+                        <p className="text-[#141413] font-medium">{yr.measurableOutputs}</p>
+                      </div>
+
+                      <div className="space-y-1">
+                        <span className="text-[11px] font-mono uppercase tracking-wider text-[#0F5C6E] block font-semibold">
+                          6. Evidence to Create
+                        </span>
+                        <p className="text-[#0F5C6E] font-semibold">{yr.evidenceToCreate}</p>
+                      </div>
                     </div>
                   </div>
+                );
+              })}
+            </div>
+
+            <div className="flex items-center justify-between pt-4 border-t border-[#141413]/15">
+              <button
+                type="button"
+                onClick={() => setStep(3)}
+                className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#4A4843] hover:text-[#141413] cursor-pointer"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                <span>Back to Action Plan</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setStep(5)}
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-lg text-sm font-semibold bg-[#0F5C6E] text-white hover:bg-[#0B4654] transition-colors cursor-pointer"
+              >
+                <span>Continue to Progress & Tracker</span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
+            </div>
+          </section>
+        )}
+
+        {/* =========================================================
+            SCREEN 6: PROGRESS
+            Show checkboxes, progress percentage, project evidence, and internship tracking.
+           ========================================================= */}
+        {step === 5 && (
+          <section className="space-y-10">
+            <div className="flex flex-wrap items-end justify-between gap-4 pb-6 border-b border-[#141413]/15">
+              <div className="space-y-1.5">
+                <span className="text-xs font-mono uppercase tracking-[0.16em] text-[#0F5C6E]">
+                  06 / Progress, Evidence & Applications
+                </span>
+                <h1 className="font-serif text-3xl sm:text-4xl text-[#141413]">
+                  Track your 30-day execution and proof.
+                </h1>
+                <p className="text-sm text-[#5C5953]">
+                  Check off weekly tasks, link verifiable portfolio artifacts, and track internship or placement applications.
+                </p>
+              </div>
+
+              <div className="flex items-center gap-4 bg-[#F3EFE6] px-5 py-3 rounded-xl border border-[#141413]/15">
+                <div>
+                  <span className="text-[10px] font-mono uppercase tracking-wider text-[#6E6B64] block">
+                    30-Day Checklist
+                  </span>
+                  <span className="font-serif text-2xl text-[#141413] tabular-nums">
+                    {thirtyDayCompletionPct}% Complete
+                  </span>
+                </div>
+                <div className="w-24 h-2 bg-[#141413]/10 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-[#0F5C6E] transition-all duration-300"
+                    style={{ width: `${thirtyDayCompletionPct}%` }}
+                  />
                 </div>
               </div>
+            </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3.5">
-                {activeGuidance.thirtyDayPhases.map((phase) => {
-                  const doneInPhase = phase.tasks.filter((t) =>
-                    doneTasks.includes(t.task)
-                  ).length;
-                  return (
-                    <div
-                      key={phase.id}
-                      className="p-4 rounded-xl bg-slate-50 border border-slate-200 flex flex-col justify-between space-y-3"
-                    >
-                      <div className="space-y-2.5">
-                        <div className="flex items-center justify-between gap-2">
-                          <span className="text-[11px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-indigo-50 text-indigo-700 border border-indigo-200">
-                            {phase.phaseLabel}
-                          </span>
-                          <span className="text-[11px] font-mono font-semibold text-slate-500">
-                            {doneInPhase}/{phase.tasks.length}
-                          </span>
-                        </div>
-
-                        <h3 className="text-sm font-bold text-slate-900">{phase.title}</h3>
-                        <p className="text-xs text-slate-600">
-                          <strong className="text-slate-800">Objective:</strong> {phase.objective}
-                        </p>
-
-                        {/* Checkable Tasks */}
-                        <div className="space-y-1.5 pt-1">
-                          {phase.tasks.map((t) => {
-                            const isChecked = doneTasks.includes(t.task);
-                            return (
-                              <label
-                                key={t.task}
-                                className={`flex items-start gap-2 p-2 rounded-lg border text-xs cursor-pointer transition-colors ${
-                                  isChecked
-                                    ? "bg-emerald-50/70 border-emerald-200 text-slate-500 line-through"
-                                    : "bg-white border-slate-200 text-slate-800 hover:border-indigo-300"
-                                }`}
-                              >
-                                <input
-                                  type="checkbox"
-                                  checked={isChecked}
-                                  onChange={() => toggleTask(t.task)}
-                                  className="mt-0.5 rounded text-indigo-600 focus:ring-indigo-500 cursor-pointer"
-                                />
-                                <span>{t.task}</span>
-                              </label>
-                            );
-                          })}
-                        </div>
-                      </div>
-
-                      <div className="pt-2.5 border-t border-slate-200/80 text-[11px] space-y-1 text-slate-600">
-                        <div>
-                          <strong className="text-slate-900">Expected Output:</strong>{" "}
-                          {phase.expectedOutput}
-                        </div>
-                        <div>
-                          <strong className="text-indigo-800">Proof to Publish:</strong>{" "}
-                          {phase.proofToPublish}
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
+            {/* Week 1–4 Structured Checklist */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h2 className="font-serif text-2xl text-[#141413]">
+                  30-Day Action Checklist ({completedThirtyDayCount}/{allThirtyDayTasks.length})
+                </h2>
               </div>
 
-              {/* Custom 30-Day Task Input */}
-              <form
-                onSubmit={handleAddCustomTask}
-                className="pt-2 flex flex-wrap items-center gap-2"
-              >
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                {activeGuidance.thirtyDayPhases.map((phase) => (
+                  <div
+                    key={phase.id}
+                    className="p-5 rounded-xl bg-[#F3EFE6]/60 border border-[#141413]/15 flex flex-col justify-between space-y-4"
+                  >
+                    <div className="space-y-2.5">
+                      <span className="font-mono text-[11px] uppercase tracking-wider text-[#0F5C6E] font-semibold">
+                        {phase.phaseLabel}
+                      </span>
+                      <h3 className="font-serif text-lg text-[#141413]">{phase.title}</h3>
+                      <div className="space-y-2 pt-1">
+                        {phase.tasks.map((t) => {
+                          const isChecked = doneTasks.includes(t.task);
+                          return (
+                            <label
+                              key={t.task}
+                              className={`flex items-start gap-2.5 p-2.5 rounded-lg border text-xs cursor-pointer transition-colors ${
+                                isChecked
+                                  ? "bg-[#E6F1F3]/70 border-[#0F5C6E]/30 text-[#5C5953] line-through"
+                                  : "bg-[#FBF9F5] border-[#141413]/15 text-[#141413]"
+                              }`}
+                            >
+                              <input
+                                type="checkbox"
+                                checked={isChecked}
+                                onChange={() => toggleTask(t.task)}
+                                className="mt-0.5 accent-[#0F5C6E] cursor-pointer"
+                              />
+                              <span>{t.task}</span>
+                            </label>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    <div className="pt-3 border-t border-[#141413]/12 text-[11px] text-[#5C5953] space-y-1">
+                      <div>
+                        <strong className="text-[#141413]">Output:</strong> {phase.expectedOutput}
+                      </div>
+                      <div>
+                        <strong className="text-[#0F5C6E]">Evidence:</strong> {phase.proofToPublish}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <form onSubmit={handleAddCustomTask} className="flex flex-wrap gap-2 pt-1">
                 <input
                   type="text"
                   value={newTaskInput}
                   onChange={(e) => setNewTaskInput(e.target.value)}
-                  placeholder="Add your own 30-day action item..."
-                  className="flex-1 min-w-[220px] px-3 py-1.5 text-xs bg-slate-50 border border-slate-300 rounded-lg focus:outline-none focus:border-indigo-600"
+                  placeholder="Add custom milestone task..."
+                  className="flex-1 min-w-[220px] px-3.5 py-2 text-xs bg-[#FBF9F5] border border-[#141413]/25 rounded-lg"
                 />
                 <button
                   type="submit"
-                  className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-900 text-white hover:bg-slate-800 cursor-pointer"
+                  className="px-4 py-2 rounded-lg text-xs font-semibold bg-[#141413] text-[#FBF9F5] cursor-pointer"
                 >
                   + Add Task
                 </button>
               </form>
             </div>
 
-            {/* 4. Year-Wise BTech Plan (Year 1 to Year 4 — Adapted to Student's Current Year) */}
-            <div className="bg-white rounded-2xl border border-slate-200 p-5 sm:p-6 shadow-xs space-y-4">
-              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-3">
+            {/* Project Evidence Vault + Internship Application Tracker */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 pt-4 border-t border-[#141413]/15">
+              {/* Project & Portfolio Evidence Links */}
+              <div className="lg:col-span-5 space-y-4">
                 <div>
-                  <span className="text-[11px] font-bold uppercase tracking-wider text-indigo-600">
-                    Year-Wise BTech Journey (Year 1 – Year 4)
+                  <span className="text-[11px] font-mono uppercase tracking-[0.16em] text-[#6E6B64]">
+                    Portfolio Proof
                   </span>
-                  <h2 className="text-base sm:text-lg font-display font-bold text-slate-900">
-                    Your Year-Wise Skills, Projects, Internships & Placement Plan
-                  </h2>
-                  <p className="text-xs text-slate-600">
-                    Highlighting your current stage (<strong>{form.year}</strong>) and next 2 priority actions, with all 4 BTech years structured clearly.
-                  </p>
+                  <h2 className="font-serif text-2xl text-[#141413]">Project Evidence Links</h2>
                 </div>
 
-                <button
-                  type="button"
-                  onClick={() => setShowAllFourYears((prev) => !prev)}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200 cursor-pointer"
-                >
-                  {showAllFourYears ? (
-                    <ChevronDown className="w-4 h-4" />
-                  ) : (
-                    <ChevronRight className="w-4 h-4" />
-                  )}
-                  <span>
-                    {showAllFourYears
-                      ? "Collapse Other BTech Years"
-                      : "Expand Full 4-Year BTech Roadmap (Years 1–4)"}
-                  </span>
-                </button>
-              </div>
-
-              {/* Highlighted Current Year + Next Two Priority Actions */}
-              <div className="p-4 rounded-xl bg-indigo-50/70 border-2 border-indigo-500/80 space-y-3">
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                  <div className="flex items-center gap-2">
-                    <span className="px-2.5 py-0.5 rounded-md text-xs font-bold bg-indigo-600 text-white">
-                      Current Active Stage · {form.year}
+                <div className="p-5 rounded-xl bg-[#F3EFE6]/60 border border-[#141413]/15 space-y-3 text-xs">
+                  <label className="block space-y-1">
+                    <span className="font-semibold text-[#2C2B29] flex items-center gap-1.5">
+                      <Link2 className="w-3.5 h-3.5 text-[#0F5C6E]" />
+                      GitHub / CAD Repository URL
                     </span>
-                    <h3 className="text-sm sm:text-base font-display font-bold text-slate-900">
-                      {currentYearStage.yearLabel}: {currentYearStage.stageTitle}
-                    </h3>
-                  </div>
-                  <span className="text-xs font-medium text-indigo-800">
-                    {currentYearStage.objective}
-                  </span>
-                </div>
-
-                {/* Next 2 Highest-Priority Actions for Current Year */}
-                <div className="p-3 rounded-lg bg-white border border-indigo-200 space-y-1.5">
-                  <div className="text-[11px] font-bold uppercase tracking-wider text-indigo-700">
-                    Next 2 Highest-Priority Actions for {form.year}:
-                  </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                    {(currentYearStage.priorityActions || currentYearStage.items.slice(0, 2)).map(
-                      (act, i) => {
-                        const checked = doneTasks.includes(act);
-                        return (
-                          <label
-                            key={act}
-                            className={`flex items-start gap-2 p-2 rounded-lg border text-xs cursor-pointer ${
-                              checked
-                                ? "bg-emerald-50 border-emerald-200 text-slate-500 line-through"
-                                : "bg-slate-50 border-slate-200 text-slate-900 font-medium"
-                            }`}
-                          >
-                            <input
-                              type="checkbox"
-                              checked={checked}
-                              onChange={() => toggleTask(act)}
-                              className="mt-0.5 rounded text-indigo-600 cursor-pointer"
-                            />
-                            <span>
-                              <strong>Priority {i + 1}:</strong> {act}
-                            </span>
-                          </label>
-                        );
-                      }
-                    )}
-                  </div>
-                </div>
-
-                {/* Structured 6-Pillar Grid for Current Year */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 text-xs">
-                  <div className="p-2.5 rounded-lg bg-white border border-slate-200">
-                    <span className="font-bold text-slate-900 block">1. Skills to Build</span>
-                    <span className="text-slate-600">{currentYearStage.skillsFocus}</span>
-                  </div>
-                  <div className="p-2.5 rounded-lg bg-white border border-slate-200">
-                    <span className="font-bold text-slate-900 block">2. Projects</span>
-                    <span className="text-slate-600">{currentYearStage.projectsFocus}</span>
-                  </div>
-                  <div className="p-2.5 rounded-lg bg-white border border-slate-200">
-                    <span className="font-bold text-slate-900 block">3. Internship Actions</span>
-                    <span className="text-slate-600">{currentYearStage.internshipActions}</span>
-                  </div>
-                  <div className="p-2.5 rounded-lg bg-white border border-slate-200">
-                    <span className="font-bold text-slate-900 block">4. Placement Preparation</span>
-                    <span className="text-slate-600">{currentYearStage.placementPrep}</span>
-                  </div>
-                  <div className="p-2.5 rounded-lg bg-white border border-slate-200">
-                    <span className="font-bold text-slate-900 block">5. Measurable Outputs</span>
-                    <span className="text-slate-600">{currentYearStage.measurableOutputs}</span>
-                  </div>
-                  <div className="p-2.5 rounded-lg bg-white border border-slate-200">
-                    <span className="font-bold text-indigo-800 block">6. Evidence to Create</span>
-                    <span className="text-slate-700 font-medium">
-                      {currentYearStage.evidenceToCreate}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Collapsed / Expandable Full 4-Year BTech Milestones */}
-              {showAllFourYears && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 pt-2">
-                  {activeGuidance.yearPlan.map((yr) => {
-                    const isCurrent = yr.statusForStudent === "Current Active Year";
-                    return (
-                      <div
-                        key={yr.yearLabel}
-                        className={`p-4 rounded-xl border space-y-2.5 text-xs ${
-                          isCurrent
-                            ? "bg-indigo-50/40 border-indigo-400"
-                            : "bg-slate-50 border-slate-200"
-                        }`}
-                      >
-                        <div className="flex items-center justify-between gap-2">
-                          <span className="font-bold text-sm text-slate-900">{yr.yearLabel}</span>
-                          <span
-                            className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded ${
-                              isCurrent
-                                ? "bg-indigo-600 text-white"
-                                : yr.statusForStudent === "Completed Foundation"
-                                  ? "bg-emerald-100 text-emerald-800"
-                                  : "bg-slate-200 text-slate-700"
-                            }`}
-                          >
-                            {yr.statusForStudent}
-                          </span>
-                        </div>
-                        <p className="text-slate-600 font-medium">{yr.objective}</p>
-                        <div className="space-y-1 text-[11px] bg-white p-2.5 rounded-lg border border-slate-200">
-                          <div>
-                            <strong className="text-slate-900">Skills:</strong> {yr.skillsFocus}
-                          </div>
-                          <div>
-                            <strong className="text-slate-900">Projects:</strong> {yr.projectsFocus}
-                          </div>
-                          <div>
-                            <strong className="text-slate-900">Internships:</strong>{" "}
-                            {yr.internshipActions}
-                          </div>
-                          <div>
-                            <strong className="text-slate-900">Placement Prep:</strong>{" "}
-                            {yr.placementPrep}
-                          </div>
-                          <div>
-                            <strong className="text-slate-900">Measurable Output:</strong>{" "}
-                            {yr.measurableOutputs}
-                          </div>
-                          <div>
-                            <strong className="text-indigo-800">Evidence:</strong>{" "}
-                            {yr.evidenceToCreate}
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-
-            {/* 5. Secondary / Optional Tools (Portfolio Proof Vault, Application Tracker, Full Role Matrix) */}
-            <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-xs space-y-4">
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <div>
-                  <h2 className="text-sm font-bold text-slate-900">
-                    Optional Trackers & Detailed Role Matrix
-                  </h2>
-                  <p className="text-xs text-slate-500">
-                    Attach proof links, track internship/placement applications, or inspect full role responsibilities.
-                  </p>
-                </div>
-
-                <div className="flex flex-wrap gap-2">
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setActiveOptionalPanel((p) => (p === "evidence" ? "none" : "evidence"))
-                    }
-                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold border cursor-pointer ${
-                      activeOptionalPanel === "evidence"
-                        ? "bg-slate-900 text-white border-slate-900"
-                        : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"
-                    }`}
-                  >
-                    <Link2 className="w-3.5 h-3.5 inline mr-1" />
-                    Portfolio Evidence Links ({gapAnalysis.verifiedProofCount})
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setActiveOptionalPanel((p) =>
-                        p === "applications" ? "none" : "applications"
-                      )
-                    }
-                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold border cursor-pointer ${
-                      activeOptionalPanel === "applications"
-                        ? "bg-slate-900 text-white border-slate-900"
-                        : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"
-                    }`}
-                  >
-                    <Briefcase className="w-3.5 h-3.5 inline mr-1" />
-                    Application Tracker ({applications.length})
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setActiveOptionalPanel((p) =>
-                        p === "requirements" ? "none" : "requirements"
-                      )
-                    }
-                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold border cursor-pointer ${
-                      activeOptionalPanel === "requirements"
-                        ? "bg-slate-900 text-white border-slate-900"
-                        : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"
-                    }`}
-                  >
-                    <FileText className="w-3.5 h-3.5 inline mr-1" />
-                    Role Details & Source Notes
-                  </button>
-                </div>
-              </div>
-
-              {/* Optional Panel 1: Portfolio & Evidence Vault */}
-              {activeOptionalPanel === "evidence" && (
-                <div className="pt-3 border-t border-slate-100 grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-                  <label className="space-y-1">
-                    <span className="font-semibold text-slate-700">GitHub / CAD Repository URL</span>
                     <input
                       type="url"
                       value={evidence.githubUrl}
@@ -2375,11 +2131,12 @@ export default function App() {
                         setEvidence((prev) => ({ ...prev, githubUrl: e.target.value }))
                       }
                       placeholder="https://github.com/..."
-                      className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg"
+                      className="w-full px-3 py-2 bg-[#FBF9F5] border border-[#141413]/20 rounded-lg"
                     />
                   </label>
-                  <label className="space-y-1">
-                    <span className="font-semibold text-slate-700">Live Demo / Simulation Link</span>
+
+                  <label className="block space-y-1">
+                    <span className="font-semibold text-[#2C2B29]">Live Demo / Simulation URL</span>
                     <input
                       type="url"
                       value={evidence.demoUrl}
@@ -2387,11 +2144,12 @@ export default function App() {
                         setEvidence((prev) => ({ ...prev, demoUrl: e.target.value }))
                       }
                       placeholder="https://..."
-                      className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg"
+                      className="w-full px-3 py-2 bg-[#FBF9F5] border border-[#141413]/20 rounded-lg"
                     />
                   </label>
-                  <label className="space-y-1">
-                    <span className="font-semibold text-slate-700">1-Page Resume Link</span>
+
+                  <label className="block space-y-1">
+                    <span className="font-semibold text-[#2C2B29]">1-Page Résumé URL</span>
                     <input
                       type="url"
                       value={evidence.resumeUrl}
@@ -2399,11 +2157,12 @@ export default function App() {
                         setEvidence((prev) => ({ ...prev, resumeUrl: e.target.value }))
                       }
                       placeholder="https://drive.google.com/..."
-                      className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg"
+                      className="w-full px-3 py-2 bg-[#FBF9F5] border border-[#141413]/20 rounded-lg"
                     />
                   </label>
-                  <label className="space-y-1">
-                    <span className="font-semibold text-slate-700">Certificate / Course Proof</span>
+
+                  <label className="block space-y-1">
+                    <span className="font-semibold text-[#2C2B29]">Certificate / Lab Verification URL</span>
                     <input
                       type="url"
                       value={evidence.certificateUrl}
@@ -2411,39 +2170,48 @@ export default function App() {
                         setEvidence((prev) => ({ ...prev, certificateUrl: e.target.value }))
                       }
                       placeholder="https://..."
-                      className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg"
+                      className="w-full px-3 py-2 bg-[#FBF9F5] border border-[#141413]/20 rounded-lg"
                     />
                   </label>
                 </div>
-              )}
+              </div>
 
-              {/* Optional Panel 2: Internship & Placement Application Tracker */}
-              {activeOptionalPanel === "applications" && (
-                <div className="pt-3 border-t border-slate-100 space-y-3 text-xs">
+              {/* Internship & Placement Application Tracker */}
+              <div className="lg:col-span-7 space-y-4">
+                <div>
+                  <span className="text-[11px] font-mono uppercase tracking-[0.16em] text-[#6E6B64]">
+                    Opportunity Pipeline
+                  </span>
+                  <h2 className="font-serif text-2xl text-[#141413]">
+                    Internship & Placement Tracker
+                  </h2>
+                </div>
+
+                <div className="p-5 rounded-xl bg-[#F3EFE6]/60 border border-[#141413]/15 space-y-4 text-xs">
                   <form
                     onSubmit={handleAddApplication}
-                    className="grid grid-cols-1 sm:grid-cols-5 gap-2"
+                    className="grid grid-cols-1 sm:grid-cols-4 gap-2"
                   >
                     <input
                       type="text"
                       value={newAppCompany}
                       onChange={(e) => setNewAppCompany(e.target.value)}
-                      placeholder="Company (e.g. Google)"
-                      className="px-2.5 py-1.5 border border-slate-300 rounded-lg"
+                      placeholder="Company"
+                      className="px-3 py-2 bg-[#FBF9F5] border border-[#141413]/20 rounded-lg"
                     />
                     <input
                       type="text"
                       value={newAppRole}
                       onChange={(e) => setNewAppRole(e.target.value)}
-                      placeholder="Role (e.g. SDE Intern)"
-                      className="px-2.5 py-1.5 border border-slate-300 rounded-lg"
+                      placeholder="Role"
+                      className="px-3 py-2 bg-[#FBF9F5] border border-[#141413]/20 rounded-lg"
                     />
                     <select
                       value={newAppStatus}
                       onChange={(e) =>
                         setNewAppStatus(e.target.value as ApplicationEntry["status"])
                       }
-                      className="px-2.5 py-1.5 border border-slate-300 rounded-lg bg-white"
+                      className="px-3 py-2 bg-[#FBF9F5] border border-[#141413]/20 rounded-lg"
                     >
                       <option value="Wishlist">Wishlist</option>
                       <option value="Building Proof">Building Proof</option>
@@ -2452,36 +2220,31 @@ export default function App() {
                       <option value="Interview">Interview</option>
                       <option value="Offer">Offer</option>
                     </select>
-                    <input
-                      type="text"
-                      value={newAppEvidence}
-                      onChange={(e) => setNewAppEvidence(e.target.value)}
-                      placeholder="Proof link shared"
-                      className="px-2.5 py-1.5 border border-slate-300 rounded-lg"
-                    />
                     <button
                       type="submit"
-                      className="px-3 py-1.5 rounded-lg font-semibold bg-indigo-600 text-white hover:bg-indigo-700 cursor-pointer"
+                      className="px-3.5 py-2 rounded-lg font-semibold bg-[#0F5C6E] text-white hover:bg-[#0B4654] cursor-pointer"
                     >
-                      + Track Application
+                      + Add Entry
                     </button>
                   </form>
 
-                  <div className="divide-y divide-slate-200 border border-slate-200 rounded-xl overflow-hidden">
+                  <div className="divide-y divide-[#141413]/12 border border-[#141413]/15 rounded-xl bg-[#FBF9F5] overflow-hidden">
                     {applications.map((app) => (
                       <div
                         key={app.id}
-                        className="p-3 bg-slate-50 flex flex-wrap items-center justify-between gap-2"
+                        className="p-3.5 flex flex-wrap items-center justify-between gap-2"
                       >
                         <div>
-                          <span className="font-bold text-slate-900">{app.company}</span> ·{" "}
-                          <span className="text-slate-700">{app.role}</span>
-                          <div className="text-[11px] text-slate-500">
-                            Proof: {app.evidenceShared}
+                          <span className="font-semibold text-sm text-[#141413]">
+                            {app.company}
+                          </span>{" "}
+                          · <span className="text-[#4A4843]">{app.role}</span>
+                          <div className="text-[11px] text-[#6E6B64]">
+                            Proof linked: {app.evidenceShared}
                           </div>
                         </div>
-                        <div className="flex items-center gap-2">
-                          <span className="px-2 py-0.5 rounded bg-indigo-50 text-indigo-800 font-semibold border border-indigo-200">
+                        <div className="flex items-center gap-2.5">
+                          <span className="px-2.5 py-0.5 rounded bg-[#E6F1F3] text-[#0F5C6E] font-semibold">
                             {app.status}
                           </span>
                           <button
@@ -2489,8 +2252,8 @@ export default function App() {
                             onClick={() =>
                               setApplications((prev) => prev.filter((x) => x.id !== app.id))
                             }
-                            className="text-slate-400 hover:text-rose-600 cursor-pointer"
-                            aria-label="Remove application"
+                            className="text-[#6E6B64] hover:text-[#9E2A2B] cursor-pointer"
+                            aria-label="Delete application"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
                           </button>
@@ -2499,49 +2262,7 @@ export default function App() {
                     ))}
                   </div>
                 </div>
-              )}
-
-              {/* Optional Panel 3: Full Role Details & Source Verification Notes */}
-              {activeOptionalPanel === "requirements" && (
-                <div className="pt-3 border-t border-slate-100 space-y-3 text-xs">
-                  <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 space-y-1">
-                    <div className="font-bold text-slate-900">
-                      {activeTrack.verificationStatusLabel}
-                    </div>
-                    <p className="text-slate-600">{activeTrack.sourceSummary}</p>
-                    {activeTrack.missingInformationNotes.length > 0 && (
-                      <ul className="list-disc list-inside text-amber-800 pt-1 space-y-0.5">
-                        {activeTrack.missingInformationNotes.map((note) => (
-                          <li key={note}>{note}</li>
-                        ))}
-                      </ul>
-                    )}
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div className="p-3 rounded-xl bg-slate-50 border border-slate-200">
-                      <div className="font-bold text-slate-900 mb-1">
-                        Role Responsibilities ({form.role})
-                      </div>
-                      <ul className="list-disc list-inside text-slate-600 space-y-1">
-                        {activeTrack.responsibilities.map((r) => (
-                          <li key={r}>{r}</li>
-                        ))}
-                      </ul>
-                    </div>
-                    <div className="p-3 rounded-xl bg-slate-50 border border-slate-200">
-                      <div className="font-bold text-slate-900 mb-1">
-                        Expected Portfolio Evidence
-                      </div>
-                      <ul className="list-disc list-inside text-slate-600 space-y-1">
-                        {activeTrack.expectedEvidence.slice(0, 5).map((ev) => (
-                          <li key={ev}>{ev}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  </div>
-                </div>
-              )}
+              </div>
             </div>
           </section>
         )}
