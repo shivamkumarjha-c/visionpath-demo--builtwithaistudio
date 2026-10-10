@@ -1,118 +1,99 @@
 # VisionPath
 
-### Prepare for the role you want, not a random list of skills.
+> **Prepare for the role you want, not a random list of skills.**
 
-VisionPath is an AI-powered career planning assistant for BTech students. It helps a student turn a vague goal such as “I want an ML internship” into a practical, evidence-based preparation plan.
+VisionPath is an AI-powered career planning assistant for BTech students. It helps students plan the skills, projects, internships, and placement preparation needed for a specific target role across all four years of their degree.
 
-The app compares a student's current skills and project evidence with the requirements of a target internship or placement role. It then highlights the most important gaps, recommends what to learn and build next, and creates a year-wise roadmap from the student's current year to graduation.
+## Problem
 
-## Why this matters
+BTech students often learn disconnected technologies without knowing what a target internship or placement role actually expects. VisionPath turns a goal such as “I want a backend internship” into a clear, evidence-based plan:
 
-BTech students often spend months learning disconnected technologies. They may know the name of a target company but still not know:
+- identify role-specific requirements;
+- compare them with current knowledge and project evidence;
+- prioritize the largest skill gaps;
+- recommend one practical project that creates proof; and
+- build a year-wise roadmap from the current year to graduation.
 
-- which skills the target role actually expects;
-- which skills they already have enough evidence for;
-- which gaps should be addressed first;
-- what project can prove their ability; and
-- how to plan preparation across the remaining years of their degree.
+## What the app does
 
-VisionPath connects the target role to the student's current position and gives them a clear next step.
-
-## Core features
-
-1. **Student profile** – Collects branch, current year, goal, target role, optional company, current skills, and existing projects.
-2. **Role requirements** – Uses a sample role profile or a job description supplied by the student. Requirements are organized into required skills, preferred skills, and responsibilities.
-3. **Skill self-assessment** – Lets students describe their level for every role skill, from “Don't know” to “Used in real work”.
-4. **Evidence capture** – Accepts GitHub, project demo, résumé, certificate, or portfolio links.
-5. **Visual gap analysis** – Shows the student's status, evidence status, gap priority, and a simple explanation for each skill.
-6. **Personalized guidance** – Recommends the top gaps, learning order, a practical project task, and the evidence that task should produce.
-7. **Four-year roadmap** – Adapts the plan to the student's current year and target role.
-8. **Progress dashboard** – Includes task checkboxes, progress percentage, project links, and an internship tracker.
+1. **Goal** — Collects branch, current BTech year, internship or placement goal, optional company, target role, and optional job description.
+2. **Role requirements** — Uses curated role profiles or extracts requirements from a supplied job description. Company names alone never create invented requirements.
+3. **Skill check** — Lets students rate role-critical skills as **Know it**, **Learning it**, or **Need to learn**.
+4. **Gap analysis** — Shows current versus target levels, evidence status, and high, medium, or low priority gaps. This is guidance, not a hiring prediction.
+5. **Action plan** — Recommends the top three gaps, what to learn first, one practical project, and the proof that project should produce.
+6. **Year-wise roadmap** — Organizes skills, projects, internships, placement preparation, outputs, and evidence for Years 1–4.
+7. **Progress dashboard** — Includes a 30-day checklist, progress percentage, evidence links, PDF/print export, saved local progress, and an internship tracker.
 
 ## How the demo works
 
-```text
-Student profile
-      ↓
-Target role or supplied job description
-      ↓
-Skill self-assessment + evidence
-      ↓
-Weighted skill-gap analysis
-      ↓
-Prioritized actions and project task
-      ↓
-Year-wise roadmap and progress tracker
-```
+Student profile → Target role or supplied job description → Skill check + evidence → Visual gap analysis → Prioritized actions → Project proof → Year-wise roadmap
 
 ## AI and technical approach
 
-VisionPath uses a hybrid approach so that the product is both useful and explainable.
+VisionPath uses a hybrid approach so the result stays useful and explainable.
 
-- **Gemini** understands a supplied job description and extracts structured information such as required skills, preferred skills, and responsibilities. It also helps write personalized explanations and recommendations.
-- **Deterministic gap analysis** compares the target level for a skill with the student's self-assessed level and evidence. Required skills receive higher priority than preferred skills, and gaps are classified as high, medium, or low.
-- **Fallback role profiles** keep the demo usable when Gemini is unavailable. The app can still calculate gaps from supported sample roles.
-- **Role-source transparency** prevents the app from inventing company requirements. A company name by itself is not treated as a job specification; the student must provide a job description or use a general role profile.
+- **Gemini** extracts structured requirements from a supplied job description and personalizes explanations and recommendations.
+- **Deterministic scoring** compares the student's self-assessed level and evidence with the role target. Required skills receive higher priority than preferred skills.
+- **Role profiles and fallbacks** keep the demo usable when Gemini is unavailable or a job source is missing.
+- **Source transparency** clearly labels when company-specific requirements are not verified. The model is not asked to generate resource URLs, preventing invented links.
+- **Reliability** uses gemini-3.8-flash, a strict 20-second timeout for Gemini calls, and one retry for invalid JSON before safe fallback behavior.
 
-VisionPath is a preparation planner. It does not predict hiring decisions or guarantee selection.
+VisionPath does not predict hiring decisions or guarantee selection.
 
 ## Technology
 
-- React and TypeScript user interface
-- Responsive, mobile-friendly design
-- Gemini-powered requirement extraction and personalization
-- Client-side progress and assessment state for the prototype
-- Structured role profiles and rule-based gap scoring for reliable fallback behavior
+- React + TypeScript
+- Vite
+- Express server
+- Google Gemini via @google/genai
+- Responsive editorial UI with Nunito typography
+- Browser localStorage for prototype progress
 
-## Running the project
+## Run locally
 
-### Google AI Studio demo
+### Requirements
 
-The hackathon demo is built in Google AI Studio. Open the shared AI Studio app link, run the preview, and start with one of the sample role flows. The sample data allows the complete experience to be demonstrated immediately.
+- Node.js 18 or newer
+- A Gemini API key for live Gemini requests
 
-### Running an exported source version
+### Install and start
 
-Create a `.env` file in the project root with `GEMINI_API_KEY=your_key_here` (see `.env.example`). The key is read only by the Express server and is never sent to the browser. Never commit `.env`.
+npm install
 
-Open the local URL printed by the development server. If Gemini access is enabled in the exported version, add the required API key using the environment-variable format documented by the exported project. Never commit API keys to GitHub.
+Create .env in the project root with:
 
-## Demo walkthrough
+GEMINI_API_KEY=your_key_here
 
-For a quick presentation, use this example:
+Then run:
 
-1. Select `CSE (AI/ML)` and the student's current year.
-2. Choose `Internship` and `ML Engineer Intern`.
-3. Add current skills such as Python and basic machine learning.
-4. Leave deployment, MLOps, or project evidence at a lower level.
-5. Review the visual gap chart and the high-priority gaps.
-6. Show the recommended project task and the four-year roadmap.
-7. Mark a task complete and add a project link in the progress dashboard.
+npm run dev
 
-## Product principles
+The terminal will print the local development URL. Never commit .env or an API key.
 
-- Start with the student's target role, not a generic course list.
-- Explain why every recommendation was made.
-- Separate required skills from preferred skills.
-- Treat evidence as different from self-reported knowledge.
-- Show uncertainty when a reliable job source is missing.
-- Give students one practical next action instead of overwhelming them with text.
+## Demo links
 
-## Limitations and future scope
-Current prototype limits: progress is stored in the browser (localStorage), not in the cloud; there are no user accounts; skill levels are self-reported; AI output can be imperfect and should be reviewed by the student.
-The quality of recommendations depends on the supplied job description and the accuracy of the student's self-assessment. Job requirements also change over time. Future versions can add:
+- **Live product:** https://ais-dev-jvcwknpxxc6cfe7ud3kvix-721558726448.asia-southeast1.run.app/
+- **Google AI Studio app:** https://aistudio.google.com/apps/994eb3af-c819-4f94-9f19-52b198db89ee
 
-- verified career-page and job-board integrations;
-- résumé and GitHub portfolio analysis;
-- short skill assessments to validate self-reported levels;
-- mentor and placement-cell feedback;
-- reminders, accounts, and secure cloud synchronization; and
-- analytics for colleges and training programs.
+## Suggested judge walkthrough
+
+1. Start the sample demo.
+2. Choose a branch, year, internship or placement goal, company if relevant, and target role.
+3. Review the role-specific requirements.
+4. Rate the skills using the three quick choices.
+5. Show the readiness signal and prioritized visual gap chart.
+6. Explain the top three actions and practical project.
+7. Open the year-wise roadmap and mark one progress task complete.
+8. Show the evidence section and download the plan.
+
+## Limitations
+
+This is a hackathon prototype. Progress is stored locally in the browser, there are no user accounts, and skill levels are self-reported. Recommendations depend on the supplied job description and should be reviewed by the student. Job requirements can change over time.
 
 ## Team
 
-Built for the **Tricity AI-Thon 2026** hackathon by the VisionPath team.
-
+Built for the Tricity AI-Thon 2026 by the VisionPath team.
 
 ## License
 
-This project was created as a hackathon prototype.
+Hackathon prototype.
