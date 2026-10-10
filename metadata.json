@@ -1,0 +1,6 @@
+{
+  "name": "VisionPath",
+  "description": "Career readiness, skill gap analysis, and AI-personalized learning and project roadmap platform for BTech engineering students.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
